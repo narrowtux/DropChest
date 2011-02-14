@@ -1,0 +1,8 @@
+dropchest.create
+dropchest.remove
+dropchest.radius.set
+dropchest.radius.setBig
+dropchest.teleport
+dropchest.which
+dropchest.list
+dropchest

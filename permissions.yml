@@ -6,3 +6,6 @@ dropchest.teleport
 dropchest.which
 dropchest.list
 dropchest
+dropchest.filter.reset
+dropchest.filter.set
+dropchest.destroy

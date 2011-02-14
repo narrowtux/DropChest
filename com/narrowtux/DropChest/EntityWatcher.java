@@ -43,9 +43,7 @@ public class EntityWatcher extends TimerTask {
 						short damage = (short)eitem.a.damage;
 						ItemStack stack = new ItemStack(type, count, damage);
 						for(DropChestItem dci : plugin.getChests()){
-							Chest chest = dci.getChest();
-							Inventory i = chest.getInventory();
-							Block block = chest.getWorld().getBlockAt(chest.getX(), chest.getY(), chest.getZ());
+							Block block = dci.getChest().getWorld().getBlockAt(dci.getChest().getX(), dci.getChest().getY(), dci.getChest().getZ());
 							if(block.getTypeId()!=Material.CHEST.getId()){
 								if(chestsToBeRemoved.contains(dci)){
 									plugin.getChests().remove(dci);
@@ -57,9 +55,9 @@ public class EntityWatcher extends TimerTask {
 							} else if(chestsToBeRemoved.contains(dci)){
 								chestsToBeRemoved.remove(dci);
 							}
-							if(plugin.isNear(chest.getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
+							if(plugin.isNear(dci.getChest().getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
 							{
-								HashMap<Integer, ItemStack> ret = i.addItem(stack);
+								HashMap<Integer, ItemStack> ret = dci.addItem(stack);
 								if(ret.size()==0)
 									eitem.q();
 								else {

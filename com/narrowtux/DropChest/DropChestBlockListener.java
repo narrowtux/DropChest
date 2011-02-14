@@ -62,6 +62,14 @@ public class DropChestBlockListener extends BlockListener {
 				if(plugin.isRequestingWhichChest()){
 					if(chestdci!=null){
 						plugin.getRequestPlayer().sendMessage("ID: "+String.valueOf(chestid+1)+" Radius: "+String.valueOf(chestdci.getRadius()));
+						if(chestdci.getFilter().size()!=0){
+							plugin.getRequestPlayer().sendMessage("This Chest is filtered. It will just accept items of the following types:");
+							String acceptstring = "";
+							for(Material m:chestdci.getFilter()){
+								acceptstring+=m.toString() + ", ";
+							}
+							plugin.getRequestPlayer().sendMessage(acceptstring);
+						}
 					} else {
 						plugin.getRequestPlayer().sendMessage("This is not a DropChest!");
 					}
@@ -82,7 +90,7 @@ public class DropChestBlockListener extends BlockListener {
 		if(block.getTypeId() == Material.CHEST.getId()){
 			for(DropChestItem dci : plugin.getChests())
 			{
-				if(plugin.locationsEqual(plugin.locationOf(dci.getChest()),block.getLocation())){
+				if(plugin.locationsEqual(plugin.locationOf(dci.getChest()),block.getLocation())&&!plugin.hasPermission(event.getPlayer(), "dropchest.destroy")){
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(ChatColor.RED.toString()+"You need to remove this DropChest before breaking it");
 				}
@@ -115,8 +123,32 @@ public class DropChestBlockListener extends BlockListener {
 				}
 				i++;
 			}
-			if(chestexists&&event.getDamageLevel().getLevel()==0){
-				player.sendMessage("You touched me with type "+player.getItemInHand().getType().toString());
+			if(chestexists&&event.getDamageLevel().getLevel()==0&&plugin.hasPermission(player, "dropchest.filter.set")){
+				Material m = player.getItemInHand().getType();
+				boolean found = false;
+				if(m.getId()==0&&plugin.hasPermission(player, "dropchest.filter.reset")){
+					chestdci.getFilter().clear();
+					player.sendMessage(ChatColor.GREEN.toString()+"All items will be accepted.");
+				} else{
+					for (Material ma : chestdci.getFilter()){
+						if(m.getId()==ma.getId()){
+							chestdci.getFilter().remove(ma);
+							found = true;
+							if(chestdci.getFilter().size()==0){
+								player.sendMessage(ChatColor.GREEN.toString()+"All items will be accepted.");
+							} else {
+								player.sendMessage(ChatColor.RED.toString()+ma.toString()+" won't be accepted.");
+							}
+							break;
+						}
+					}
+					if(!found)
+					{
+						chestdci.getFilter().add(m);
+						player.sendMessage(ChatColor.GREEN.toString()+m.toString()+" will be accepted.");
+					}
+				}
+				plugin.save();
 			}
 		}
 	}

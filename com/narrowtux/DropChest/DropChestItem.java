@@ -1,5 +1,6 @@
 package com.narrowtux.DropChest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -82,5 +83,23 @@ public class DropChestItem {
 	
 	public List<Material> getFilter(){
 		return filter;
+	}
+	
+	public HashMap<Integer, ItemStack> addItem(ItemStack item)
+	{
+		if(filter.size()==0)
+			return chest.getInventory().addItem(item);
+		else
+		{
+			for(Material m : filter)
+			{
+				if(m.getId()==item.getTypeId()){
+					return chest.getInventory().addItem(item);
+				}
+			}
+			HashMap<Integer, ItemStack> ret = new HashMap<Integer, ItemStack>();
+			ret.put(0, item);
+			return ret;
+		}
 	}
 }

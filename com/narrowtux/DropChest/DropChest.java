@@ -102,7 +102,7 @@ public class DropChest extends JavaPlugin {
 			if(test != null) {
 				this.Permissions = ((Permissions)test).getHandler();
 			} else {
-				this.getServer().getPluginManager().disablePlugin(this);
+				System.out.println("Warning! Permissions is not enabled! All Operations are allowed!");
 			}
 		}
 	}
@@ -130,7 +130,7 @@ public class DropChest extends JavaPlugin {
 						long worldid = 0;
 						if(locSplit.length>=4){
 							radius = (int)Integer.valueOf(locSplit[3]);
-							if(locSplit.length==5){
+							if(locSplit.length>=5){
 								worldid = (long)Long.valueOf(locSplit[4]);
 							}
 						}
@@ -138,6 +138,12 @@ public class DropChest extends JavaPlugin {
 						if(b.getTypeId() == Material.CHEST.getId()){
 							Chest chest = (Chest)(ContainerBlock)b.getState();
 							DropChestItem dci = new DropChestItem(chest, radius, this);
+							if(locSplit.length>=6){
+								List<Material> filter = dci.getFilter();
+								for(int i = 5;i<locSplit.length;i++){
+									filter.add(Material.getMaterial((int)Integer.valueOf(locSplit[i])));
+								}
+							}
 							chests.add(dci);
 						} else {
 							System.out.println("Could not find a chest."+locline);
@@ -147,7 +153,7 @@ public class DropChest extends JavaPlugin {
 					}
 				}
 				input.close();
-				setChests(chests);
+				save();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -177,7 +183,13 @@ public class DropChest extends JavaPlugin {
 			{
 				Block block = dci.getChest().getBlock();
 				Location loc = block.getLocation();
-				String line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(dci.getRadius()) + "," + String.valueOf(loc.getWorld().getId()) + "\n";
+				String line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(dci.getRadius()) + "," + String.valueOf(loc.getWorld().getId());
+				//Filter saving
+				for(Material m:dci.getFilter())
+				{
+					line+=","+String.valueOf(m.getId());
+				}
+				line+="\n";
 				w.write(line);
 			}
 			w.flush();
@@ -337,7 +349,7 @@ public class DropChest extends JavaPlugin {
 						syntaxerror = true;
 					}
 				} else if(args[0].equalsIgnoreCase("which")){
-					if(player!=null&&!Permissions.has(player, "dropchest.which")){
+					if(!hasPermission(player, "dropchest.which")){
 						player.sendMessage("You may not ask if this is a DropChest.");
 						return false;
 					}
@@ -348,6 +360,25 @@ public class DropChest extends JavaPlugin {
 						sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its id");
 					}
 
+				}else if(args[0].equalsIgnoreCase("resetfilter")){
+					if(!hasPermission(player, "dropchest.filter.reset"))
+					{
+						player.sendMessage("You may not reset the filter of a DropChest!");
+						return false;
+					} 
+					if(args.length==2){
+						int chestid = Integer.valueOf(args[1]);
+						chestid--;
+						if(chestid>=0&&chestid<chests.size()){
+							chests.get(chestid).getFilter().clear();
+							save();
+							sender.sendMessage(ChatColor.GREEN.toString()+"Reset filter.");
+						} else {
+							syntaxerror = true;
+						}
+					} else {
+						syntaxerror = true;
+					}
 				}else {
 					syntaxerror = true;
 				}

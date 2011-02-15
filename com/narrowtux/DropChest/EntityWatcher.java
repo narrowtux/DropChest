@@ -58,8 +58,11 @@ public class EntityWatcher extends TimerTask {
 							if(plugin.isNear(dci.getChest().getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
 							{
 								HashMap<Integer, ItemStack> ret = dci.addItem(stack);
-								if(ret.size()==0)
+								boolean allin = false;
+								if(ret.size()==0){
 									eitem.q();
+									allin = true;
+								}
 								else {
 									for(ItemStack s : ret.values()){
 										eitem.a.count = s.getAmount();
@@ -69,7 +72,9 @@ public class EntityWatcher extends TimerTask {
 									dci.warnFull();
 								else if(dci.getPercentFull()>=0.8)
 									dci.warnNearlyFull();
-								break;
+								if(allin){
+									break;
+								}
 							}
 						}
 					}

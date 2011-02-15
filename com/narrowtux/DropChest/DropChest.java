@@ -473,6 +473,9 @@ public class DropChest extends JavaPlugin {
 				return w;
 			}
 		}
+		if(worldid==0){
+			return getServer().getWorlds().get(0);
+		}
 		return null;
 	}
 	

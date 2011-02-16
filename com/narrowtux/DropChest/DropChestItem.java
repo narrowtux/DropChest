@@ -15,7 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public class DropChestItem {
-	private Chest chest;
+	private ContainerBlock containerBlock;
+	private Block block;
+
 	private int radius;
 	private boolean warnedNearlyFull;
 	private boolean warnedFull;
@@ -24,13 +26,14 @@ public class DropChestItem {
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
 	private boolean loadedProperly = true;
 
-	public DropChestItem(Chest chest, int radius, DropChest plugin)
+	public DropChestItem(ContainerBlock containerBlock, int radius, Block block, DropChest plugin)
 	{
-		this.chest = chest;
+		this.containerBlock = containerBlock;
 		this.radius = radius;
 		warnedNearlyFull = false;
 		warnedFull = false;
 		this.plugin = plugin;
+		this.block = block;
 	}
 
 	public DropChestItem(String loadString, String fileVersion, DropChest plugin)
@@ -41,12 +44,12 @@ public class DropChestItem {
 		load(loadString, fileVersion);
 	}
 
-	public Chest getChest() {
-		return chest;
+	public ContainerBlock getChest() {
+		return containerBlock;
 	}
 
 	public void setChest(Chest chest) {
-		this.chest = chest;
+		this.containerBlock = chest;
 	}
 
 	public int getRadius() {
@@ -60,7 +63,7 @@ public class DropChestItem {
 	}
 
 	public double getPercentFull(){
-		Inventory inv = chest.getInventory();
+		Inventory inv = containerBlock.getInventory();
 		int fullstacks = 0;
 		int stacks = inv.getSize();
 		for(int j = 0; j<stacks; j++){
@@ -104,13 +107,13 @@ public class DropChestItem {
 	public HashMap<Integer, ItemStack> addItem(ItemStack item)
 	{
 		if(filter.size()==0)
-			return chest.getInventory().addItem(item);
+			return containerBlock.getInventory().addItem(item);
 		else
 		{
 			for(Material m : filter)
 			{
 				if(m.getId()==item.getTypeId()){
-					return chest.getInventory().addItem(item);
+					return containerBlock.getInventory().addItem(item);
 				}
 			}
 			HashMap<Integer, ItemStack> ret = new HashMap<Integer, ItemStack>();
@@ -134,7 +137,7 @@ public class DropChestItem {
 	}
 
 	public void setRedstone(boolean value){
-		Block below = chest.getBlock().getFace(BlockFace.DOWN).getFace(BlockFace.DOWN);
+		Block below = block.getFace(BlockFace.DOWN).getFace(BlockFace.DOWN);
 		if(below.getTypeId() == Material.REDSTONE_WIRE.getId()){
 			if(value){
 				below.setData((byte) 15);
@@ -145,13 +148,13 @@ public class DropChestItem {
 	}
 
 	public void dropAll(){
-		World world = chest.getBlock().getWorld();
-		Location loc = plugin.locationOf(chest);
-		for(int i = 0; i<chest.getInventory().getSize();i++){
-			ItemStack item = chest.getInventory().getItem(i);
+		World world = block.getWorld();
+		Location loc = block.getLocation();
+		for(int i = 0; i<containerBlock.getInventory().getSize();i++){
+			ItemStack item = containerBlock.getInventory().getItem(i);
 			if(item.getAmount()!=0){
 				world.dropItem(loc, item);
-				chest.getInventory().remove(item);
+				containerBlock.getInventory().remove(item);
 			}
 		}
 		System.out.println("Dropped all items");
@@ -179,9 +182,10 @@ public class DropChestItem {
 				{
 					Block b = wo.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
 					if(b.getTypeId() == Material.CHEST.getId()){
-						Chest chest = (Chest)(ContainerBlock)b.getState();
-						this.chest = chest;
+						ContainerBlock chest = (ContainerBlock)b.getState();
+						this.containerBlock = chest;
 						this.radius = radius;
+						this.block = b;
 						if(locSplit.length>=6){
 							List<Material> filter = getFilter();
 							for(int i = 5;i<locSplit.length;i++){
@@ -223,9 +227,10 @@ public class DropChestItem {
 					world = plugin.getWorldWithId(worldid);
 					if(world!=null){
 						Block b = world.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
-						if(b.getTypeId() == Material.CHEST.getId()){
-							this.chest = (Chest)(ContainerBlock)b.getState();
-							if(this.chest==null){
+						if(b.getTypeId() == Material.CHEST.getId()||b.getTypeId()==Material.DISPENSER.getId()){
+							this.containerBlock = (ContainerBlock)b.getState();
+							this.block = b;
+							if(this.containerBlock==null){
 								loadedProperly = false;
 								System.out.println("Chest is null...");
 							}
@@ -252,7 +257,6 @@ public class DropChestItem {
 	{
 		// VERSION!!!! 0.1
 		String line = "";
-		Block block = chest.getBlock();
 		Location loc = block.getLocation();
 		line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(getRadius()) + "," + String.valueOf(loc.getWorld().getId());
 		line += "," + String.valueOf(minecartAction);
@@ -273,5 +277,21 @@ public class DropChestItem {
 
 	public boolean isLoadedProperly() {
 		return loadedProperly;
+	}
+	
+
+	public Block getBlock() {
+		return block;
+	}
+
+	public void setBlock(Block block) {
+		this.block = block;
+	}
+	
+	static public boolean acceptsBlockType(Material m){
+		return m.getId()==Material.CHEST.getId()
+				||m.getId()==Material.DISPENSER.getId()
+				||m.getId()==Material.FURNACE.getId()
+				||m.getId()==Material.BURNING_FURNACE.getId();
 	}
 }

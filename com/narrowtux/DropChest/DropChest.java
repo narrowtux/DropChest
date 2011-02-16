@@ -273,7 +273,7 @@ public class DropChest extends JavaPlugin {
 					sender.sendMessage(ChatColor.BLUE.toString()+"------------------");
 					sender.sendMessage(ChatColor.GREEN.toString()+String.valueOf(chests.size())+" DropChests total");
 					for(DropChestItem dci : chests){
-						Chest chest = dci.getChest();
+						ContainerBlock chest = dci.getChest();
 						Inventory inv = chest.getInventory();
 						int fullstacks = 0;
 						int stacks = inv.getSize();
@@ -293,9 +293,8 @@ public class DropChest extends JavaPlugin {
 					}
 					int i = Integer.valueOf(args[1]);
 					if(i-1<chests.size()&&i>0){
-						Chest chest = chests.get(i-1).getChest();
 						if(player!=null){
-							player.teleportTo(new Location(getServer().getWorlds().get(0),chest.getX(), chest.getY(), chest.getZ()));
+							player.teleportTo(chests.get(i-1).getBlock().getLocation());
 						}
 					} else {
 						syntaxerror = true;
@@ -470,7 +469,7 @@ public class DropChest extends JavaPlugin {
 	public DropChestItem getChestByBlock(Block block)
 	{
 		for(DropChestItem dcic : chests){
-			if(locationsEqual(locationOf(dcic.getChest()), block.getLocation())){
+			if(locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
 				return dcic;
 			}
 		}

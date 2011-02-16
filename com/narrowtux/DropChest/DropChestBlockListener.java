@@ -33,8 +33,8 @@ public class DropChestBlockListener extends BlockListener {
 		}
 		if(plugin.isRequestingChest()&&player==plugin.getRequestPlayer()){
 			Block b = event.getBlock();
-			if(b.getTypeId() == Material.CHEST.getId()){
-				Chest chest = (Chest)(ContainerBlock)b.getState();
+			if(DropChestItem.acceptsBlockType(b.getType())){
+				ContainerBlock chest = (ContainerBlock)b.getState();
 				int radius = plugin.getRequestedRadius();
 				if(radius < 2)
 					radius = 2;
@@ -45,7 +45,7 @@ public class DropChestBlockListener extends BlockListener {
 				int i = 0;
 				for(DropChestItem dcic : chests){
 					Block block = b;
-					if(plugin.locationsEqual(plugin.locationOf(dcic.getChest()), block.getLocation())){
+					if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
 						chestexists = true;
 						chestdci = dcic;
 						chestid = i;
@@ -54,7 +54,7 @@ public class DropChestBlockListener extends BlockListener {
 					i++;
 				}
 				if(!chestexists&&!plugin.isRequestingWhichChest()){
-					DropChestItem dci = new DropChestItem(chest, radius, plugin);
+					DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
 					chests.add(dci);
 					if(player!=null)
 					{
@@ -71,7 +71,9 @@ public class DropChestBlockListener extends BlockListener {
 								acceptstring+=m.toString() + ", ";
 							}
 							plugin.getRequestPlayer().sendMessage(acceptstring);
+							
 						}
+						plugin.getRequestPlayer().sendMessage("Minecart-Action: "+chestdci.getMinecartAction().toString());
 					} else {
 						plugin.getRequestPlayer().sendMessage("This is not a DropChest!");
 					}
@@ -92,7 +94,7 @@ public class DropChestBlockListener extends BlockListener {
 				int i = 0;
 				for(DropChestItem dcic : chests){
 					Block block = event.getBlock();
-					if(plugin.locationsEqual(plugin.locationOf(dcic.getChest()), block.getLocation())){
+					if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
 						chestexists = true;
 						chestdci = dcic;
 						break;
@@ -112,6 +114,7 @@ public class DropChestBlockListener extends BlockListener {
 						player.sendMessage("DropChest will ignore Storage Minecarts");
 					}
 					chestdci.setMinecartAction(action);
+					plugin.save();
 					event.setCancelled(true);
 				}
 			}
@@ -121,10 +124,10 @@ public class DropChestBlockListener extends BlockListener {
 	@Override
 	public void onBlockBreak(BlockBreakEvent event){
 		Block block = event.getBlock();
-		if(block.getTypeId() == Material.CHEST.getId()){
+		if(DropChestItem.acceptsBlockType(block.getType())){
 			for(DropChestItem dci : plugin.getChests())
 			{
-				if(plugin.locationsEqual(plugin.locationOf(dci.getChest()),block.getLocation())&&!plugin.hasPermission(event.getPlayer(), "dropchest.destroy")){
+				if(plugin.locationsEqual(dci.getBlock().getLocation(),block.getLocation())&&!plugin.hasPermission(event.getPlayer(), "dropchest.destroy")){
 					event.setCancelled(true);
 					event.getPlayer().sendMessage(ChatColor.RED.toString()+"You need to remove this DropChest before breaking it");
 				}
@@ -137,8 +140,8 @@ public class DropChestBlockListener extends BlockListener {
 	{
 		Player player = event.getPlayer();
 		Block b = event.getBlock();
-		if(b.getTypeId() == Material.CHEST.getId()){
-			Chest chest = (Chest)(ContainerBlock)b.getState();
+		if(DropChestItem.acceptsBlockType(b.getType())){
+			ContainerBlock chest = (ContainerBlock)b.getState();
 			int radius = plugin.getRequestedRadius();
 			if(radius < 2)
 				radius = 2;
@@ -149,7 +152,7 @@ public class DropChestBlockListener extends BlockListener {
 			int i = 0;
 			for(DropChestItem dcic : chests){
 				Block block = b;
-				if(plugin.locationsEqual(plugin.locationOf(dcic.getChest()), block.getLocation())){
+				if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
 					chestexists = true;
 					chestdci = dcic;
 					chestid = i;

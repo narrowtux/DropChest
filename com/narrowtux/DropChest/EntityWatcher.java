@@ -12,6 +12,7 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.StorageMinecart;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.inventory.Inventory;
 
 import java.util.List;
@@ -53,8 +54,8 @@ public class EntityWatcher extends TimerTask {
 						short damage = (short)eitem.a.damage;
 						ItemStack stack = new ItemStack(type, count, damage);
 						for(DropChestItem dci : plugin.getChests()){
-							Block block = dci.getChest().getWorld().getBlockAt(dci.getChest().getX(), dci.getChest().getY(), dci.getChest().getZ());
-							if(block.getTypeId()!=Material.CHEST.getId()){
+							Block block = dci.getBlock();
+							if(!DropChestItem.acceptsBlockType(block.getType())){
 								if(chestsToBeRemoved.contains(dci)){
 									plugin.getChests().remove(dci);
 									chestsToBeRemoved.remove(dci);
@@ -65,7 +66,7 @@ public class EntityWatcher extends TimerTask {
 							} else if(chestsToBeRemoved.contains(dci)){
 								chestsToBeRemoved.remove(dci);
 							}
-							if(plugin.isNear(dci.getChest().getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
+							if(plugin.isNear(dci.getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
 							{
 								HashMap<Integer, ItemStack> ret = dci.addItem(stack);
 								boolean allin = false;
@@ -100,9 +101,9 @@ public class EntityWatcher extends TimerTask {
 							CraftStorageMinecart storage = new CraftStorageMinecart((CraftServer)plugin.getServer(), minecart);
 							Inventory inv = storage.getInventory();
 							for(DropChestItem dci : plugin.getChests()){
-								if(plugin.isNear(plugin.locationOf(dci.getChest()), storage.getLocation(), 2))
+								if(plugin.isNear(dci.getBlock().getLocation(), storage.getLocation(), 2))
 								{
-									Chest chest = dci.getChest();
+									ContainerBlock chest = dci.getChest();
 									Inventory chinv = chest.getInventory();
 									Inventory miinv = storage.getInventory();
 									if(dci.getMinecartAction()==DropChestMinecartAction.PUSH_TO_MINECART){
@@ -121,7 +122,7 @@ public class EntityWatcher extends TimerTask {
 										for(int i = 0; i<miinv.getSize();i++){
 											ItemStack items = miinv.getItem(i);
 											if(items.getAmount()!=0){
-												HashMap<Integer,ItemStack> hash = chinv.addItem(items);
+												HashMap<Integer,ItemStack> hash = dci.addItem(items);
 												if(hash.size()!=0){
 													ItemStack ret=hash.get(0);
 													items.setAmount(items.getAmount()-ret.getAmount());

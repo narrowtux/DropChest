@@ -2,6 +2,7 @@ package com.narrowtux.DropChest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -137,14 +138,22 @@ public class DropChestItem {
 	}
 
 	public void setRedstone(boolean value){
-		Block below = block.getFace(BlockFace.DOWN).getFace(BlockFace.DOWN);
-		if(below.getTypeId() == Material.REDSTONE_WIRE.getId()){
+		Block below = block.getFace(BlockFace.DOWN);
+		if(below.getTypeId() == Material.LEVER.getId()){
+			byte data = below.getData();
 			if(value){
-				below.setData((byte) 15);
+				data=0x8|0x5;
 			} else {
-				below.setData((byte) 0);
+				data=0x5;
 			}
+			below.setData(data);
 		}
+	}
+	
+	public void triggerRedstone(){
+		setRedstone(true);
+		Timer timer = new Timer();
+		timer.schedule(new RedstoneTrigger(this), 1000);
 	}
 
 	public void dropAll(){

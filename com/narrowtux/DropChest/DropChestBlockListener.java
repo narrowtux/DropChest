@@ -8,6 +8,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockInteractEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
+
 import java.util.List;
 
 import org.bukkit.block.Chest;
@@ -81,6 +83,38 @@ public class DropChestBlockListener extends BlockListener {
 				event.setCancelled(true);
 				System.out.println("DropChest activated on "+String.valueOf(chests.size())+" Chests");
 			}
+		} else {
+			if(player!=null)
+			{
+				chests = plugin.getChests();
+				boolean chestexists = false;
+				DropChestItem chestdci = null;
+				int i = 0;
+				for(DropChestItem dcic : chests){
+					Block block = event.getBlock();
+					if(plugin.locationsEqual(plugin.locationOf(dcic.getChest()), block.getLocation())){
+						chestexists = true;
+						chestdci = dcic;
+						break;
+					}
+					i++;
+				}
+				if(chestexists&&player.getItemInHand().getType().toString().contains("MINECART")){
+					DropChestMinecartAction action = chestdci.getMinecartAction();
+					if(action == DropChestMinecartAction.IGNORE){
+						action = DropChestMinecartAction.PUSH_TO_MINECART;
+						player.sendMessage("DropChest will push its contents to a Storage Minecart");
+					} else if(action == DropChestMinecartAction.PUSH_TO_MINECART){
+						action = DropChestMinecartAction.PULL_FROM_MINECART;
+						player.sendMessage("DropChest will pull contents from a Storage Minecart");
+					} else if(action == DropChestMinecartAction.PULL_FROM_MINECART){
+						action = DropChestMinecartAction.IGNORE;
+						player.sendMessage("DropChest will ignore Storage Minecarts");
+					}
+					chestdci.setMinecartAction(action);
+					event.setCancelled(true);
+				}
+			}
 		}
 	}
 
@@ -149,6 +183,16 @@ public class DropChestBlockListener extends BlockListener {
 					}
 				}
 				plugin.save();
+			}
+		}
+	}
+	
+	@Override
+	public void onBlockRedstoneChange(BlockRedstoneEvent event){
+		if(event.getNewCurrent()>0){
+			DropChestItem chestdci = plugin.getChestByBlock(event.getBlock());
+			if(chestdci!=null){
+				chestdci.dropAll();
 			}
 		}
 	}

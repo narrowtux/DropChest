@@ -54,6 +54,7 @@ public class DropChest extends JavaPlugin {
 	private int requestedRadius;
 	private Player requestPlayer;
 	public PermissionHandler Permissions = null;
+	private String version = "0.0";
 
 	public DropChest(PluginLoader pluginLoader, Server instance,
 			PluginDescriptionFile desc, File folder, File plugin,
@@ -75,10 +76,11 @@ public class DropChest extends JavaPlugin {
 		pm.registerEvent(Event.Type.BLOCK_INTERACT, blockListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.BLOCK_DAMAGED, blockListener, Priority.Monitor, this);
+		pm.registerEvent(Event.Type.REDSTONE_CHANGE, blockListener, Priority.Normal, this);
 		// EXAMPLE: Custom code, here we just output some info so we can check all is well
 		PluginDescriptionFile pdfFile = this.getDescription();
 		System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
-
+		version = pdfFile.getVersion();
 		// Load our stuff
 		load();
 	}
@@ -115,41 +117,24 @@ public class DropChest extends JavaPlugin {
 				input = new FileInputStream("plugins/DropChest.txt");
 				InputStreamReader ir = new InputStreamReader(input);
 				BufferedReader r = new BufferedReader(ir);
-				String locline = "testseereasd";
+				String locline;
+				String version = "0.0";
 				while(true){
 					locline = r.readLine();
 					if(locline == null)
 						break;
-					String locSplit[] = locline.split(",");
-					if(locSplit.length>=3){
-						Double x = Double.valueOf(locSplit[0]);
-						Double y = Double.valueOf(locSplit[1]);
-						Double z = Double.valueOf(locSplit[2]);
-
-						int radius = 2;
-						long worldid = 0;
-						if(locSplit.length>=4){
-							radius = (int)Integer.valueOf(locSplit[3]);
-							if(locSplit.length>=5){
-								worldid = (long)Long.valueOf(locSplit[4]);
-							}
-						}
-						Block b = getWorldWithId(worldid).getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
-						if(b.getTypeId() == Material.CHEST.getId()){
-							Chest chest = (Chest)(ContainerBlock)b.getState();
-							DropChestItem dci = new DropChestItem(chest, radius, this);
-							if(locSplit.length>=6){
-								List<Material> filter = dci.getFilter();
-								for(int i = 5;i<locSplit.length;i++){
-									filter.add(Material.getMaterial((int)Integer.valueOf(locSplit[i])));
-								}
-							}
-							chests.add(dci);
-						} else {
-							System.out.println("Could not find a chest."+locline);
-						}
+					if(locline.startsWith("#"))
+					{
+						continue;
+					}
+					if(locline.contains("version")){
+						version = locline.split(" ")[1];
 					} else {
-						System.out.println("Could not read a line."+locline);
+						DropChestItem item = new DropChestItem(locline, version, this);
+						if(item.isLoadedProperly())
+							chests.add(item);
+						else
+							System.out.println("Problem with line "+locline);
 					}
 				}
 				input.close();
@@ -179,17 +164,11 @@ public class DropChest extends JavaPlugin {
 		try {
 			FileOutputStream output = new FileOutputStream("plugins/DropChest.txt");
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
+			w.write("version 0.1\n");
+			w.write("# LEGEND\n# x, y, z, radius, worldid, minecartAction; FILTERED ITEMS\n");
 			for(DropChestItem dci : chests)
 			{
-				Block block = dci.getChest().getBlock();
-				Location loc = block.getLocation();
-				String line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(dci.getRadius()) + "," + String.valueOf(loc.getWorld().getId());
-				//Filter saving
-				for(Material m:dci.getFilter())
-				{
-					line+=","+String.valueOf(m.getId());
-				}
-				line+="\n";
+				String line = dci.save();
 				w.write(line);
 			}
 			w.flush();
@@ -436,7 +415,7 @@ public class DropChest extends JavaPlugin {
 			return max;
 		}
 	}
-	
+
 	public boolean hasPermission(Player player, String node){
 		if(Permissions==null)
 		{
@@ -453,7 +432,7 @@ public class DropChest extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	public boolean onPermissionSend(CommandSender sender, String node, String message){
 		Player player = null;
 		if(sender.getClass().getName().contains("Player")){
@@ -466,7 +445,7 @@ public class DropChest extends JavaPlugin {
 			return false;
 		}
 	}
-	
+
 	public World getWorldWithId(long worldid){
 		for (World w : getServer().getWorlds()){
 			if(w.getId()==worldid){
@@ -478,14 +457,24 @@ public class DropChest extends JavaPlugin {
 		}
 		return null;
 	}
-	
+
 	public Location locationOf(Chest chest){
 		Location ret = new Location(chest.getWorld(), chest.getX(), chest.getY(), chest.getZ());
 		return ret;
 	}
-	
+
 	public boolean locationsEqual(Location loc1, Location loc2){
 		return loc1.getWorld().getId()==loc2.getWorld().getId()&&loc1.getX()==loc2.getX()&&loc1.getY()==loc2.getY()&&loc1.getZ()==loc2.getZ();
+	}
+
+	public DropChestItem getChestByBlock(Block block)
+	{
+		for(DropChestItem dcic : chests){
+			if(locationsEqual(locationOf(dcic.getChest()), block.getLocation())){
+				return dcic;
+			}
+		}
+		return null;
 	}
 }
 

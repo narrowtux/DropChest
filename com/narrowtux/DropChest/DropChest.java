@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.event.Event.Priority;
@@ -54,6 +53,7 @@ public class DropChest extends JavaPlugin {
 	private int requestedRadius;
 	private Player requestPlayer;
 	public PermissionHandler Permissions = null;
+	@SuppressWarnings("unused")
 	private String version = "0.0";
 	private DropChestVehicleListener vehicleListener = new DropChestVehicleListener(this);
 
@@ -166,8 +166,8 @@ public class DropChest extends JavaPlugin {
 		try {
 			FileOutputStream output = new FileOutputStream("plugins/DropChest.txt");
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
-			w.write("version 0.1\n");
-			w.write("# LEGEND\n# x, y, z, radius, worldid, minecartAction; FILTERED ITEMS\n");
+			w.write("version 0.4\n");
+			w.write("# LEGEND\n# x, y, z, radius, World-Name, minecartAction; FILTERED ITEMS\n");
 			for(DropChestItem dci : chests)
 			{
 				String line = dci.save();
@@ -255,9 +255,10 @@ public class DropChest extends JavaPlugin {
 					if(args.length==2){
 						int chestid = Integer.valueOf(args[1]);
 						chestid--;
-						if(chestid>=0&&chestid<chests.size()){
-							chests.remove(chestid);
-							setChests(chests);
+						DropChestItem dci = getChestById(chestid);
+						if(dci!=null){
+							chests.remove(dci);
+							save();
 							sender.sendMessage(ChatColor.RED.toString()+"Removed Chest.");
 						} else {
 							syntaxerror = true;
@@ -271,35 +272,38 @@ public class DropChest extends JavaPlugin {
 						return false;
 					}
 					int i = 1;
-					sender.sendMessage(ChatColor.BLUE.toString()+"List of DropChests");
-					sender.sendMessage(ChatColor.BLUE.toString()+"------------------");
-					sender.sendMessage(ChatColor.GREEN.toString()+String.valueOf(chests.size())+" DropChests total");
-					for(DropChestItem dci : chests){
-						ContainerBlock chest = dci.getChest();
-						Inventory inv = chest.getInventory();
-						int fullstacks = 0;
-						int stacks = inv.getSize();
-						for(int j = 0; j<stacks; j++){
-							ItemStack stack = inv.getItem(j);
-							if(stack.getAmount()!=0){
-								fullstacks++;
-							}
-						}
-						sender.sendMessage("DropChest #"+String.valueOf(i) + ": " + String.valueOf(fullstacks) + "/" + String.valueOf(stacks)+ " stacks used. Radius: "+String.valueOf(dci.getRadius()));
-						i++;
+
+					//Page limit is 6 items per page
+					//calculation of needed pages
+					int num = chests.size();
+					int needed = (int) Math.ceil((double)num/6.0);
+					int current = 1;
+					if(args.length==2){
+						current = Integer.valueOf(args[1]);
 					}
+					if(current>needed)
+						current = 1;
+					if(needed!=1)
+						sender.sendMessage(ChatColor.BLUE.toString()+"Page "+String.valueOf(current)+" of "+ String.valueOf(needed));
+					sender.sendMessage(ChatColor.BLUE.toString()+"ID | % full | filters | minecart action ");
+					sender.sendMessage(ChatColor.BLUE.toString()+"------");
+					for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
+						sender.sendMessage(chests.get(i).listString());
+					}
+
 				} else if(args[0].equalsIgnoreCase("tp")){
 					if(!hasPermission(player, "dropchest.teleport")){
 						player.sendMessage("You may not teleport to DropChests.");
 						return false;
 					}
 					int i = Integer.valueOf(args[1]);
-					if(i-1<chests.size()&&i>0){
+					DropChestItem dci = getChestById(i);
+					if(dci!=null){
 						if(player!=null){
-							player.teleportTo(chests.get(i-1).getBlock().getLocation());
+							player.teleportTo(dci.getBlock().getLocation());
 						}
 					} else {
-						syntaxerror = true;
+						sender.sendMessage(ChatColor.RED.toString()+"This chest does not exist.");
 					}
 				} else if(args[0].equalsIgnoreCase("setradius")){
 					if(!hasPermission(player, "dropchest.radius.set")){
@@ -310,8 +314,8 @@ public class DropChest extends JavaPlugin {
 						int chestid = Integer.valueOf(args[1]);
 						int radius = Integer.valueOf(args[2]);
 						chestid--;
-						if(chestid>=0&&chestid<chests.size() && radius>=1){
-							DropChestItem dci = chests.get(chestid);
+						DropChestItem dci = getChestById(chestid);
+						if(dci != null){
 							boolean force=true;
 							if(!hasPermission(player, "dropchest.radius.setBig")){
 								force =  false;
@@ -349,8 +353,9 @@ public class DropChest extends JavaPlugin {
 					if(args.length==2){
 						int chestid = Integer.valueOf(args[1]);
 						chestid--;
-						if(chestid>=0&&chestid<chests.size()){
-							chests.get(chestid).getFilter().clear();
+						DropChestItem dci = getChestById(chestid);
+						if(dci!=null){
+							dci.getFilter().clear();
 							save();
 							sender.sendMessage(ChatColor.GREEN.toString()+"Reset filter.");
 						} else {
@@ -409,6 +414,9 @@ public class DropChest extends JavaPlugin {
 		if(player == null){
 			return 65536;
 		} else {
+			if(Permissions==null){
+				return 65536;
+			}
 			int max = Permissions.getPermissionInteger(player.getName(), "dropchestmaxradius");
 			if(max==-1){
 				max = 20;
@@ -473,6 +481,16 @@ public class DropChest extends JavaPlugin {
 		for(DropChestItem dcic : chests){
 			if(locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
 				return dcic;
+			}
+		}
+		return null;
+	}
+	
+	public DropChestItem getChestById(int id){
+		for(DropChestItem dci : chests)
+		{
+			if(dci.getId()==id){
+				return dci;
 			}
 		}
 		return null;

@@ -15,6 +15,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
+import com.sun.tools.example.debug.gui.Environment;
+
 public class DropChestItem {
 	private ContainerBlock containerBlock;
 	private Block block;
@@ -26,7 +28,8 @@ public class DropChestItem {
 	private List<Material> filter = new ArrayList<Material>();
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
 	private boolean loadedProperly = true;
-
+	private static int currentId = 1;
+	private int id;
 	public DropChestItem(ContainerBlock containerBlock, int radius, Block block, DropChest plugin)
 	{
 		this.containerBlock = containerBlock;
@@ -35,6 +38,7 @@ public class DropChestItem {
 		warnedFull = false;
 		this.plugin = plugin;
 		this.block = block;
+		id = currentId++;
 	}
 
 	public DropChestItem(String loadString, String fileVersion, DropChest plugin)
@@ -211,7 +215,7 @@ public class DropChestItem {
 			} else {
 				loadedProperly = false;
 			}
-		} else if(fileVersion.equalsIgnoreCase("0.1")){
+		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")){
 			String splt[] = loadString.split(";");
 			if(splt.length>=1){
 				String data[] = splt[0].split(",");
@@ -223,7 +227,7 @@ public class DropChestItem {
 						filter.add(Material.valueOf(filters[i]));
 					}
 				}
-				if(data.length==6){
+				if(data.length>=6){
 					Double x,y,z;
 					long worldid;
 					World world;
@@ -231,12 +235,30 @@ public class DropChestItem {
 					y = Double.valueOf(data[1]);
 					z = Double.valueOf(data[2]);
 					radius = Integer.valueOf(data[3]);
-					worldid = Long.valueOf(data[4]);
-					minecartAction = DropChestMinecartAction.valueOf(data[5]);
-					world = plugin.getWorldWithId(worldid);
+					setMinecartAction(DropChestMinecartAction.valueOf(data[5]));
+					org.bukkit.World.Environment env = org.bukkit.World.Environment.NORMAL;
+					if(fileVersion.equals("0.3")){
+						env = org.bukkit.World.Environment.valueOf(data[6]);
+					}
+					if(fileVersion.equalsIgnoreCase("0.1")){
+						worldid = Long.valueOf(data[4]);
+						world = plugin.getWorldWithId(worldid);
+					} else {
+						world = plugin.getServer().getWorld(data[4]);
+						if(world==null)
+						{
+							world = plugin.getServer().createWorld(data[4], env);
+						}
+					}
+					if(fileVersion.equals("0.4")){
+						id = Integer.valueOf(data[7]);
+						currentId = Math.max(currentId, id+1);
+					} else {
+						id = currentId++;
+					}
 					if(world!=null){
 						Block b = world.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
-						if(b.getTypeId() == Material.CHEST.getId()||b.getTypeId()==Material.DISPENSER.getId()){
+						if(acceptsBlockType(b.getType())){
 							this.containerBlock = (ContainerBlock)b.getState();
 							this.block = b;
 							if(this.containerBlock==null){
@@ -244,31 +266,37 @@ public class DropChestItem {
 								System.out.println("Chest is null...");
 							}
 						} else {
+							System.out.println("Block is not accepted!");
 							loadedProperly = false;
 						}
 					} else {
+						System.out.println("World not found!");
 						loadedProperly = false;
 					}
 				} else {
+					System.out.println("Number of columns not accepted!");
 					loadedProperly = false;
 					return;
 				}
 			} else {
+				System.out.println("Number of columns not accepted!");
 				loadedProperly=false;
 			}
 		} else {
-			System.out.println("Could not find version:"+fileVersion);
+			System.out.println("File has invalid version: "+fileVersion);
 			loadedProperly=false;
 		}
 	}
 
 	public String save()
 	{
-		// VERSION!!!! 0.1
+		// VERSION!!!! 0.3
 		String line = "";
 		Location loc = block.getLocation();
-		line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(getRadius()) + "," + String.valueOf(loc.getWorld().getId());
+		line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(getRadius()) + "," + String.valueOf(loc.getWorld().getName());
 		line += "," + String.valueOf(minecartAction);
+		line += "," + String.valueOf(loc.getWorld().getEnvironment());
+		line += "," + String.valueOf(id);
 		line += ";";
 		//Filter saving
 		int i = 0;
@@ -288,7 +316,6 @@ public class DropChestItem {
 		return loadedProperly;
 	}
 	
-
 	public Block getBlock() {
 		return block;
 	}
@@ -296,11 +323,36 @@ public class DropChestItem {
 	public void setBlock(Block block) {
 		this.block = block;
 	}
-	
+
 	static public boolean acceptsBlockType(Material m){
 		return m.getId()==Material.CHEST.getId()
 				||m.getId()==Material.DISPENSER.getId()
 				||m.getId()==Material.FURNACE.getId()
 				||m.getId()==Material.BURNING_FURNACE.getId();
+	}
+
+	public int getId() {
+		return id;
+	}
+	
+	public String listString(){
+		String ret = "";
+		ret+="#"+String.valueOf(id);
+		double p = getPercentFull();
+		ret+=" | "+(int)(p*100)+"%";
+		if(getFilter().size()>0)
+		{
+			ret+=" | has "+String.valueOf(getFilter().size())+" filtered items";
+		} else {
+			ret+=" | no filters";
+		}
+		if(minecartAction.equals(DropChestMinecartAction.IGNORE)){
+			ret+=" | ignore";
+		} else if(minecartAction.equals(DropChestMinecartAction.PUSH_TO_MINECART)){
+			ret+=" | push";
+		} else {
+			ret+=" | pull";
+		}
+		return ret;
 	}
 }

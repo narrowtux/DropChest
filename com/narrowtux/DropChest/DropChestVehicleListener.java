@@ -28,7 +28,7 @@ public class DropChestVehicleListener extends VehicleListener {
 	{
 		timescalled++;
 		if(timescalled%100==0){
-			System.out.println(String.valueOf(timescalled));
+			//System.out.println(String.valueOf(timescalled));
 		}
 		 if(event.getVehicle() instanceof Minecart)
 			{

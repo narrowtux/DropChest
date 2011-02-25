@@ -395,11 +395,12 @@ public class DropChestItem {
 		return ret;
 	}
 
+	@SuppressWarnings("unused")
 	public void minecartAction(CraftStorageMinecart storage){
 		ContainerBlock chest = getChest();
 		Inventory chinv = chest.getInventory();
 		Inventory miinv = storage.getInventory();
-		if(isFurnace()){
+		if(false){
 			//item stacks of furnaces:
 			// stack 1: fuel, can be either wood or coal
 			// stack 0: meltables, can be ores, sand, cobblestone, log and cactus

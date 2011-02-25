@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.bukkit.block.Chest;
 import org.bukkit.block.ContainerBlock;
+
+import com.sun.tools.javac.jvm.CRTable;
 /**
  * DropChest block listener
  * @author narrowtux
@@ -30,12 +32,15 @@ public class DropChestBlockListener extends BlockListener {
 		Player player = null;
 		if(event.getEntity().getClass().getName().contains("Player")){
 			player = (Player)event.getEntity();
+		} else {
+			return;
 		}
-		if(plugin.isRequestingChest()&&player==plugin.getRequestPlayer()){
+		DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(player.getName());
+		if(dplayer!=null&&!dplayer.getChestRequestType().equals(ChestRequestType.NONE)){
 			Block b = event.getBlock();
 			if(DropChestItem.acceptsBlockType(b.getType())){
 				ContainerBlock chest = (ContainerBlock)b.getState();
-				int radius = plugin.getRequestedRadius();
+				int radius = dplayer.getRequestedRadius();
 				if(radius < 2)
 					radius = 2;
 				chests = plugin.getChests();
@@ -53,7 +58,7 @@ public class DropChestBlockListener extends BlockListener {
 					}
 					i++;
 				}
-				if(!chestexists&&!plugin.isRequestingWhichChest()){
+				if(!chestexists&&dplayer.getChestRequestType().equals(ChestRequestType.CREATE)){
 					DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
 					chests.add(dci);
 					if(player!=null)
@@ -61,62 +66,26 @@ public class DropChestBlockListener extends BlockListener {
 						player.sendMessage("Activated DropChest on this Chest");
 					}
 				}
-				if(plugin.isRequestingWhichChest()){
+				if(dplayer.getChestRequestType().equals(ChestRequestType.WHICH)){
 					if(chestdci!=null){
-						plugin.getRequestPlayer().sendMessage("ID: "+String.valueOf(chestid+1)+" Radius: "+String.valueOf(chestdci.getRadius()));
-						if(chestdci.getFilter().size()!=0){
-							plugin.getRequestPlayer().sendMessage("This Chest is filtered. It will just accept items of the following types:");
-							String acceptstring = "";
-							for(Material m:chestdci.getFilter()){
+						dplayer.getPlayer().sendMessage("ID: "+String.valueOf(chestid+1)+" Radius: "+String.valueOf(chestdci.getRadius()));
+						String acceptstring = "";
+						for(FilterType type:FilterType.values()){
+							acceptstring+=type.toString()+": ";
+							for(Material m:chestdci.getFilter(type)){
 								acceptstring+=m.toString() + ", ";
 							}
-							plugin.getRequestPlayer().sendMessage(acceptstring);
-							
 						}
-						plugin.getRequestPlayer().sendMessage("Minecart-Action: "+chestdci.getMinecartAction().toString());
-					} else {
-						plugin.getRequestPlayer().sendMessage("This is not a DropChest!");
-					}
-					plugin.resetRequestChest();
-				}
+						dplayer.getPlayer().sendMessage(acceptstring);
 
-				plugin.resetRequestChest();
-				plugin.setChests(chests);
+					} else {
+						dplayer.getPlayer().sendMessage("This is not a DropChest!");
+					}
+				}
+				dplayer.setChestRequestType(ChestRequestType.NONE);
+				plugin.save();
 				event.setCancelled(true);
 				System.out.println("DropChest activated on "+String.valueOf(chests.size())+" Chests");
-			}
-		} else {
-			if(player!=null)
-			{
-				chests = plugin.getChests();
-				boolean chestexists = false;
-				DropChestItem chestdci = null;
-				int i = 0;
-				for(DropChestItem dcic : chests){
-					Block block = event.getBlock();
-					if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
-						chestexists = true;
-						chestdci = dcic;
-						break;
-					}
-					i++;
-				}
-				if(chestexists&&player.getItemInHand().getType().toString().contains("MINECART")){
-					DropChestMinecartAction action = chestdci.getMinecartAction();
-					if(action == DropChestMinecartAction.IGNORE){
-						action = DropChestMinecartAction.PUSH_TO_MINECART;
-						player.sendMessage("DropChest will push its contents to a Storage Minecart");
-					} else if(action == DropChestMinecartAction.PUSH_TO_MINECART){
-						action = DropChestMinecartAction.PULL_FROM_MINECART;
-						player.sendMessage("DropChest will pull contents from a Storage Minecart");
-					} else if(action == DropChestMinecartAction.PULL_FROM_MINECART){
-						action = DropChestMinecartAction.IGNORE;
-						player.sendMessage("DropChest will ignore Storage Minecarts");
-					}
-					chestdci.setMinecartAction(action);
-					plugin.save();
-					event.setCancelled(true);
-				}
 			}
 		}
 	}
@@ -139,6 +108,7 @@ public class DropChestBlockListener extends BlockListener {
 	public void onBlockDamage(BlockDamageEvent event)
 	{
 		Player player = event.getPlayer();
+		DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(player.getName());
 		Block b = event.getBlock();
 		if(DropChestItem.acceptsBlockType(b.getType())){
 			ContainerBlock chest = (ContainerBlock)b.getState();
@@ -160,18 +130,18 @@ public class DropChestBlockListener extends BlockListener {
 				}
 				i++;
 			}
-			if(chestexists&&event.getDamageLevel().getLevel()==0&&plugin.hasPermission(player, "dropchest.filter.set")){
+			if(chestexists&&event.getDamageLevel().getLevel()==0&&plugin.hasPermission(player, "dropchest.filter.set")&&dplayer.isEditingFilter()){
 				Material m = player.getItemInHand().getType();
 				boolean found = false;
 				if(m.getId()==0&&plugin.hasPermission(player, "dropchest.filter.reset")){
-					chestdci.getFilter().clear();
+					chestdci.getFilter(dplayer.getEditingFilterType()).clear();
 					player.sendMessage(ChatColor.GREEN.toString()+"All items will be accepted.");
 				} else{
-					for (Material ma : chestdci.getFilter()){
+					for (Material ma : chestdci.getFilter(dplayer.getEditingFilterType())){
 						if(m.getId()==ma.getId()){
-							chestdci.getFilter().remove(ma);
+							chestdci.getFilter(dplayer.getEditingFilterType()).remove(ma);
 							found = true;
-							if(chestdci.getFilter().size()==0){
+							if(chestdci.getFilter(dplayer.getEditingFilterType()).size()==0){
 								player.sendMessage(ChatColor.GREEN.toString()+"All items will be accepted.");
 							} else {
 								player.sendMessage(ChatColor.RED.toString()+ma.toString()+" won't be accepted.");
@@ -181,7 +151,7 @@ public class DropChestBlockListener extends BlockListener {
 					}
 					if(!found)
 					{
-						chestdci.getFilter().add(m);
+						chestdci.getFilter(dplayer.getEditingFilterType()).add(m);
 						player.sendMessage(ChatColor.GREEN.toString()+m.toString()+" will be accepted.");
 					}
 				}
@@ -189,7 +159,7 @@ public class DropChestBlockListener extends BlockListener {
 			}
 		}
 	}
-	
+
 	@Override
 	public void onBlockRedstoneChange(BlockRedstoneEvent event){
 		if(event.getNewCurrent()>0){

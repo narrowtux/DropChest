@@ -69,10 +69,10 @@ public class EntityWatcher extends TimerTask {
 							}
 							if(plugin.isNear(dci.getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
 							{
-								HashMap<Integer, ItemStack> ret = dci.addItem(stack);
+								HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
 								boolean allin = false;
 								if(ret.size()==0){
-									eitem.q();
+									item.remove();
 									allin = true;
 								}
 								else {

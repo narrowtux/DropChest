@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.event.Event.Priority;
@@ -24,6 +25,8 @@ import com.narrowtux.DropChest.EntityWatcher;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -48,28 +51,24 @@ public class DropChest extends JavaPlugin {
 	private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
 	private EntityWatcher entityWatcher;
 	private Timer entityTimer = new Timer();
-	private boolean requestChest;
-	private boolean whichChest;
 	private int requestedRadius;
 	private Player requestPlayer;
 	public PermissionHandler Permissions = null;
 	@SuppressWarnings("unused")
 	private String version = "0.0";
 	private DropChestVehicleListener vehicleListener = new DropChestVehicleListener(this);
-
-	public DropChest(PluginLoader pluginLoader, Server instance,
-			PluginDescriptionFile desc, File folder, File plugin,
-			ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, folder, plugin, cLoader);
+	public Logger log;
+	public DropChest() {
 		// TODO: Place any custom initialisation code here
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		requestedRadius = 2;
+		DropChestPlayer.plugin = this;
 	}
 
 
 	public void onEnable() {
+		log = getServer().getLogger();
 		setupPermissions();
-
 		entityWatcher = new EntityWatcher(this);
 		entityTimer.scheduleAtFixedRate(entityWatcher, 100, 1000);
 		// Register our events
@@ -79,9 +78,10 @@ public class DropChest extends JavaPlugin {
 		pm.registerEvent(Event.Type.BLOCK_DAMAGED, blockListener, Priority.Monitor, this);
 		pm.registerEvent(Event.Type.REDSTONE_CHANGE, blockListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
+		//pm.registerEvent(Event.Type.VEHICLE_ENTER, vehicleListener, Priority.Normal, this);
 		// EXAMPLE: Custom code, here we just output some info so we can check all is well
 		PluginDescriptionFile pdfFile = this.getDescription();
-		System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
+		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
 		version = pdfFile.getVersion();
 		// Load our stuff
 		load();
@@ -103,10 +103,11 @@ public class DropChest extends JavaPlugin {
 
 
 		if(this.Permissions == null) {
-			if(test != null) {
+			try{
 				this.Permissions = ((Permissions)test).getHandler();
-			} else {
-				System.out.println("Warning! Permissions is not enabled! All Operations are allowed!");
+			} catch(Exception e) {
+				this.Permissions = null;
+				log.log(Level.WARNING, "Permissions is not enabled! All Operations are allowed!");
 			}
 		}
 	}
@@ -136,7 +137,7 @@ public class DropChest extends JavaPlugin {
 						if(item.isLoadedProperly())
 							chests.add(item);
 						else
-							System.out.println("Problem with line "+locline);
+							log.log(Level.SEVERE, "Problem with line "+locline);
 					}
 				}
 				input.close();
@@ -156,7 +157,7 @@ public class DropChest extends JavaPlugin {
 	public void save(){
 		File file = new File("plugins/DropChest.txt");
 		if(!file.exists()){
-			System.out.println("no file. Trying to create it.");
+			log.log(Level.SEVERE, "no file. Trying to create it.");
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
@@ -166,8 +167,8 @@ public class DropChest extends JavaPlugin {
 		try {
 			FileOutputStream output = new FileOutputStream("plugins/DropChest.txt");
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
-			w.write("version 0.4\n");
-			w.write("# LEGEND\n# x, y, z, radius, World-Name, minecartAction; FILTERED ITEMS\n");
+			w.write("version 0.5\n");
+			w.write("# LEGEND\n# x, y, z, radius, World-Name, minecartAction, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
 			for(DropChestItem dci : chests)
 			{
 				String line = dci.save();
@@ -228,14 +229,20 @@ public class DropChest extends JavaPlugin {
 				player.sendMessage("You may not use DropChest. Please ask your Operator to enable this awesome plugin for you.");
 				return false;
 			}
-			if(args.length >= 1&&args.length <= 3){
+			if(args.length >= 1&&args.length <= 4){
+				
+				
+				
 				if(args[0].equalsIgnoreCase("add")){
+					/*****************
+					 *      ADD      *
+					 *****************/
 					if(!hasPermission(player, "dropchest.create")){
 						player.sendMessage("You may not create DropChests.");
 						return false;
 					}
-					requestChest = true;
-					whichChest = false;
+					DropChestPlayer player2 = DropChestPlayer.getPlayerByName(player.getName());
+					player2.setChestRequestType(ChestRequestType.CREATE);
 					if(sender.getClass().getName().contains("Player"))
 						requestPlayer = (Player)sender;
 					else
@@ -246,15 +253,19 @@ public class DropChest extends JavaPlugin {
 							requestedRadius = getMaximumRadius(player);
 						}
 					}
+					player2.setRequestedRadius(requestedRadius);
+					requestedRadius = 2;
 					sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on the Chest that you want to add");
 				} else if(args[0].equalsIgnoreCase("remove")){
+					/*****************
+					 *     REMOVE    *
+					 *****************/
 					if(!hasPermission(player, "dropchest.remove")){
 						player.sendMessage("You may not remove DropChests.");
 						return false;
 					}
 					if(args.length==2){
 						int chestid = Integer.valueOf(args[1]);
-						chestid--;
 						DropChestItem dci = getChestById(chestid);
 						if(dci!=null){
 							chests.remove(dci);
@@ -267,6 +278,9 @@ public class DropChest extends JavaPlugin {
 						syntaxerror = true;
 					}
 				} else if(args[0].equalsIgnoreCase("list")){
+					/*****************
+					 *      LIST     *
+					 *****************/
 					if(!hasPermission(player, "dropchest.list")){
 						player.sendMessage("You may not list DropChests.");
 						return false;
@@ -285,13 +299,16 @@ public class DropChest extends JavaPlugin {
 						current = 1;
 					if(needed!=1)
 						sender.sendMessage(ChatColor.BLUE.toString()+"Page "+String.valueOf(current)+" of "+ String.valueOf(needed));
-					sender.sendMessage(ChatColor.BLUE.toString()+"ID | % full | filters | minecart action ");
+					sender.sendMessage(ChatColor.BLUE.toString()+"ID | % full | filters | radius");
 					sender.sendMessage(ChatColor.BLUE.toString()+"------");
 					for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
 						sender.sendMessage(chests.get(i).listString());
 					}
 
 				} else if(args[0].equalsIgnoreCase("tp")){
+					/*****************
+					 *   TELEPORT    *
+					 *****************/
 					if(!hasPermission(player, "dropchest.teleport")){
 						player.sendMessage("You may not teleport to DropChests.");
 						return false;
@@ -306,6 +323,9 @@ public class DropChest extends JavaPlugin {
 						sender.sendMessage(ChatColor.RED.toString()+"This chest does not exist.");
 					}
 				} else if(args[0].equalsIgnoreCase("setradius")){
+					/*****************
+					 *   SETRADIUS   *
+					 *****************/
 					if(!hasPermission(player, "dropchest.radius.set")){
 						player.sendMessage("You may not set the radius of a DropChest.");
 						return false;
@@ -313,7 +333,6 @@ public class DropChest extends JavaPlugin {
 					if(args.length==3){
 						int chestid = Integer.valueOf(args[1]);
 						int radius = Integer.valueOf(args[2]);
-						chestid--;
 						DropChestItem dci = getChestById(chestid);
 						if(dci != null){
 							boolean force=true;
@@ -324,7 +343,7 @@ public class DropChest extends JavaPlugin {
 								radius = getMaximumRadius(player);
 							}
 							dci.setRadius(radius);
-							sender.sendMessage("Radius of Chest #"+String.valueOf(chestid+1)+" set to "+String.valueOf(dci.getRadius()));
+							sender.sendMessage("Radius of Chest #"+String.valueOf(chestid)+" set to "+String.valueOf(dci.getRadius()));
 							setChests(chests);
 						} else {
 							syntaxerror = true;
@@ -333,51 +352,141 @@ public class DropChest extends JavaPlugin {
 						syntaxerror = true;
 					}
 				} else if(args[0].equalsIgnoreCase("which")){
+					/*****************
+					 *     WHICH     *
+					 *****************/
 					if(!hasPermission(player, "dropchest.which")){
 						player.sendMessage("You may not ask if this is a DropChest.");
 						return false;
 					}
 					if(player != null){
-						requestChest = true;
-						whichChest = true;
-						requestPlayer = player;
+						DropChestPlayer pl = DropChestPlayer.getPlayerByName(player.getName());
+						pl.setChestRequestType(ChestRequestType.WHICH);
 						sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its id");
 					}
 
-				}else if(args[0].equalsIgnoreCase("resetfilter")){
-					if(!hasPermission(player, "dropchest.filter.reset"))
+				}else if(args[0].equalsIgnoreCase("filter")){
+					/*****************
+					 *     FILTER    *
+					 *****************/
+					if(!hasPermission(player, "dropchest.filter"))
 					{
-						player.sendMessage("You may not reset the filter of a DropChest!");
+						player.sendMessage("You may not use DropChest filters!");
 						return false;
 					} 
-					if(args.length==2){
-						int chestid = Integer.valueOf(args[1]);
-						chestid--;
-						DropChestItem dci = getChestById(chestid);
-						if(dci!=null){
-							dci.getFilter().clear();
-							save();
-							sender.sendMessage(ChatColor.GREEN.toString()+"Reset filter.");
+					//dropchest filter {suck|push|pull|finish} [{chestid} {itemid|itemtype|clear}]
+					DropChestPlayer dplayer = null;
+					if(player!=null){
+						dplayer = DropChestPlayer.getPlayerByName(player.getName());
+					}
+					if(args.length>=2){
+						String typestring = args[1];
+						FilterType type = null;
+						try{
+							type = FilterType.valueOf(typestring.toUpperCase());
+						} catch(java.lang.IllegalArgumentException e){
+							type = null;
+						}
+						if(type!=null){
+							if(args.length==2&&dplayer!=null){
+								dplayer.setEditingFilter(true);
+								dplayer.setEditingFilterType(type);
+								dplayer.getPlayer().sendMessage(ChatColor.GREEN.toString()+"You're now entering interactive mode for filtering "+type.toString().toLowerCase()+"ed items");
+							} else if(dplayer==null&&args.length==2) {
+								sender.sendMessage("You can't use interactive mode from a console!");
+							} else if(args.length==4) {
+								String cheststring = args[2];
+								String itemstring = args[3];
+								Integer chestid = null;
+								try{
+									chestid = Integer.valueOf(cheststring);
+								} catch (java.lang.NumberFormatException e){
+									chestid = null;
+								}
+								if(chestid!=null){
+									DropChestItem chest = getChestById(chestid);
+									Material item = null;
+									if(itemstring.equalsIgnoreCase("clear")){
+										chest.getFilter(type).clear();
+										sender.sendMessage(ChatColor.GREEN.toString()+"Filter cleared.");
+									} else {
+										try{
+											item = Material.valueOf(itemstring.toUpperCase());
+										} catch (java.lang.IllegalArgumentException e){
+											item = null;
+										}
+										boolean materialNotFound = false;
+										if(item==null){
+											Integer itemid = null;
+											try{
+												itemid = Integer.valueOf(itemstring);
+											} catch(java.lang.NumberFormatException e)
+											{
+												itemid = null;
+											}
+											if(itemid!=null){
+												item = Material.getMaterial(itemid);
+												if(item==null){
+													materialNotFound = true;
+												}
+											} else {
+												materialNotFound = true;
+											}
+										}
+										if(!materialNotFound){
+											List<Material> filter = chest.getFilter(type);
+											if(filter.contains(item)){
+												filter.remove(item);
+												sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is no more being "+type.toString().toLowerCase()+"ed.");
+											} else {
+												filter.add(item);
+												sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is now being "+type.toString().toLowerCase()+"ed.");
+											}
+										} else {
+											sender.sendMessage("Material "+itemstring+" not found.");
+										}
+										save();
+									}
+								} else {
+									log.log(Level.INFO,"No such chest "+cheststring+".");
+									syntaxerror = true;
+								}
+							} else {
+								log.log(Level.INFO,"Too much arguments.");
+								syntaxerror = true;
+							}
+						} else if(typestring.equalsIgnoreCase("finish")) {
+							if(dplayer!=null)
+							{
+								dplayer.setEditingFilter(false);
+								dplayer.getPlayer().sendMessage(ChatColor.GREEN.toString()+"You're now leaving interactive mode!");
+							} else {
+								sender.sendMessage("You can't use interactive mode from a console!");
+							}
 						} else {
+							log.log(Level.INFO,"Filter type not found.");
 							syntaxerror = true;
 						}
-					} else {
-						syntaxerror = true;
 					}
 				}else {
+					log.log(Level.INFO, "Command not found.");
 					syntaxerror = true;
 				}
 			} else {
+				log.log(Level.INFO, "Argument count invalid.");
 				syntaxerror = true;
 			}
 			if(syntaxerror){
-				if(onPermissionSend(sender, "dropchest", "DropChest Usage:")){
+				if(1==2&&onPermissionSend(sender, "dropchest", ChatColor.BLUE.toString()+"DropChest Usage:")){
+					sender.sendMessage(ChatColor.BLUE.toString()+"{this} is a required variable argument");
+					sender.sendMessage(ChatColor.BLUE.toString()+"[this] is an optional argument");
 					onPermissionSend(sender, "dropchest.create", " /dropchest add [radius]: Add a chest to the list, default radius is 2");
-					onPermissionSend(sender, "dropchest.remove", " /dropchest remove chestid : Remove a chest from the list");
-					onPermissionSend(sender, "dropchest.list", " /dropchest list : Lists all DropChests");
-					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius chestid radius : Sets the suck-radius of the chest");
+					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chestid} : Remove a chest from the list");
+					onPermissionSend(sender, "dropchest.list", " /dropchest list [page] : Lists all DropChests");
+					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chestid} {radius} : Sets the suck-radius of the chest");
 					onPermissionSend(sender, "dropchest.which", " /dropchest which : Check if a Chest is a DropChest and which id it has");
-					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp chestid : Teleports you to DropChest with ID chestid");
+					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chestid} : Teleports you to DropChest with ID chestid");
+					onPermissionSend(sender, "dropchest.filter", "/dropchest filter {chestid} {suck|push|pull} {itemid|itemtype|clear} : Adds/Removes the given Item to/from the given filter or clears it");
 					int max = getMaximumRadius(player);
 					String maxs = String.valueOf(max);
 					if(hasPermission(player, "dropchest.radius.setBig")||max==65536){
@@ -385,21 +494,10 @@ public class DropChest extends JavaPlugin {
 					}
 					sender.sendMessage("Your maximum radius is "+maxs);
 				}
+				log.log(Level.WARNING,"Syntax error.");
 			}
 		}
 		return false;
-	}
-
-	public boolean isRequestingWhichChest() {
-		return whichChest;
-	}
-
-	public void resetRequestChest(){
-		requestChest = false;
-	}
-
-	public boolean isRequestingChest() {
-		return requestChest;
 	}
 
 	public Player getRequestPlayer() {
@@ -467,8 +565,8 @@ public class DropChest extends JavaPlugin {
 		return null;
 	}
 
-	public Location locationOf(Chest chest){
-		Location ret = new Location(chest.getWorld(), chest.getX(), chest.getY(), chest.getZ());
+	public Location locationOf(Block block){
+		Location ret = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 		return ret;
 	}
 

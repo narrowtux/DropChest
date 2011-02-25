@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
-import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,12 +12,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.craftbukkit.entity.CraftStorageMinecart;
-import org.bukkit.entity.StorageMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-
-import com.sun.tools.example.debug.gui.Environment;
 
 public class DropChestItem {
 	private ContainerBlock containerBlock;
@@ -33,6 +28,7 @@ public class DropChestItem {
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
 	private boolean loadedProperly = true;
 	private static int currentId = 1;
+	private String name = "";
 	private int id;
 	public DropChestItem(ContainerBlock containerBlock, int radius, Block block, DropChest plugin)
 	{
@@ -108,7 +104,7 @@ public class DropChestItem {
 
 	public void warnNearlyFull(){
 		if(!warnedNearlyFull){
-			plugin.getServer().broadcastMessage("Warning! Chest is nearly full.");
+			plugin.getServer().broadcastMessage("Warning! Chest "+getName()+" is nearly full.");
 			warnedNearlyFull = true;
 		}
 	}
@@ -116,7 +112,7 @@ public class DropChestItem {
 	public void warnFull(){
 		if(!warnedFull)
 		{
-			plugin.getServer().broadcastMessage("Warning! Chest is full.");
+			plugin.getServer().broadcastMessage("Warning! Chest "+getName()+" is full.");
 			warnedFull = true;
 		}
 	}
@@ -231,7 +227,7 @@ public class DropChestItem {
 			} else {
 				loadedProperly = false;
 			}
-		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")){
+		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")||fileVersion.equals("0.6")){
 			String splt[] = loadString.split(";");
 			if(splt.length>=1){
 				String data[] = splt[0].split(",");
@@ -301,6 +297,9 @@ public class DropChestItem {
 					} else {
 						id = currentId++;
 					}
+					if(fileVersion.equals("0.6")&&data.length>=9){
+						setName(data[8]);
+					}
 					if(world!=null){
 						Block b = world.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
 						if(acceptsBlockType(b.getType())){
@@ -335,13 +334,14 @@ public class DropChestItem {
 
 	public String save()
 	{
-		// VERSION!!!! 0.5
+		// VERSION!!!! 0.6
 		String line = "";
 		Location loc = block.getLocation();
 		line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(getRadius()) + "," + String.valueOf(loc.getWorld().getName());
-		line += "," + String.valueOf(minecartAction);
+		line += ",";
 		line += "," + String.valueOf(loc.getWorld().getEnvironment());
 		line += "," + String.valueOf(id);
+		line += "," + name;
 		//Filter saving
 		for(FilterType type : FilterType.values()){
 			line += ";";
@@ -387,7 +387,7 @@ public class DropChestItem {
 
 	public String listString(){
 		String ret = "";
-		ret+="#"+String.valueOf(id);
+		ret+=getName();
 		double p = getPercentFull();
 		ret+=" | "+(int)(p*100)+"%";
 		ret+=" | "+String.valueOf(getFilter(FilterType.SUCK).size()+getFilter(FilterType.PUSH).size()+getFilter(FilterType.PULL).size())+" ";
@@ -517,5 +517,22 @@ public class DropChestItem {
 
 	public boolean isDispenser(){
 		return block.getType().equals(Material.DISPENSER);
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		if(name.isEmpty()){
+			return "#"+String.valueOf(id);
+		}
+		return name;
 	}
 }

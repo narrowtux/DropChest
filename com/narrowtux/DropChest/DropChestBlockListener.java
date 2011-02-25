@@ -11,11 +11,7 @@ import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.List;
-
-import org.bukkit.block.Chest;
 import org.bukkit.block.ContainerBlock;
-
-import com.sun.tools.javac.jvm.CRTable;
 /**
  * DropChest block listener
  * @author narrowtux
@@ -111,13 +107,11 @@ public class DropChestBlockListener extends BlockListener {
 		DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(player.getName());
 		Block b = event.getBlock();
 		if(DropChestItem.acceptsBlockType(b.getType())){
-			ContainerBlock chest = (ContainerBlock)b.getState();
 			int radius = plugin.getRequestedRadius();
 			if(radius < 2)
 				radius = 2;
 			chests = plugin.getChests();
 			boolean chestexists = false;
-			int chestid = 0;
 			DropChestItem chestdci = null;
 			int i = 0;
 			for(DropChestItem dcic : chests){
@@ -125,7 +119,6 @@ public class DropChestBlockListener extends BlockListener {
 				if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
 					chestexists = true;
 					chestdci = dcic;
-					chestid = i;
 					break;
 				}
 				i++;

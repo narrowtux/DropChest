@@ -9,14 +9,10 @@ import java.util.HashMap;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -29,8 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import java.io.*;
@@ -59,7 +53,6 @@ public class DropChest extends JavaPlugin {
 	private DropChestVehicleListener vehicleListener = new DropChestVehicleListener(this);
 	public Logger log;
 	public DropChest() {
-		// TODO: Place any custom initialisation code here
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		requestedRadius = 2;
 		DropChestPlayer.plugin = this;
@@ -167,8 +160,9 @@ public class DropChest extends JavaPlugin {
 		try {
 			FileOutputStream output = new FileOutputStream("plugins/DropChest.txt");
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
-			w.write("version 0.5\n");
-			w.write("# LEGEND\n# x, y, z, radius, World-Name, minecartAction, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
+			w.write("version 0.6\n");
+			w.write("#LEGEND\n#x, y, z, radius, World-Name, nothing, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
+			w.write("#Filtered items are separated by ','. Name the items like the names in org.bukkit.Material, e.g. COBBLESTONE");
 			for(DropChestItem dci : chests)
 			{
 				String line = dci.save();
@@ -179,7 +173,6 @@ public class DropChest extends JavaPlugin {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -199,7 +192,6 @@ public class DropChest extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		// TODO Auto-generated method stub
 		entityTimer.cancel();
 
 	}
@@ -297,9 +289,10 @@ public class DropChest extends JavaPlugin {
 					}
 					if(current>needed)
 						current = 1;
-					if(needed!=1)
+					if(needed!=1){
 						sender.sendMessage(ChatColor.BLUE.toString()+"Page "+String.valueOf(current)+" of "+ String.valueOf(needed));
-					sender.sendMessage(ChatColor.BLUE.toString()+"ID | % full | filters | radius");
+					}
+					sender.sendMessage(ChatColor.BLUE.toString()+"Name | % full | filters | radius");
 					sender.sendMessage(ChatColor.BLUE.toString()+"------");
 					for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
 						sender.sendMessage(chests.get(i).listString());
@@ -468,7 +461,27 @@ public class DropChest extends JavaPlugin {
 							syntaxerror = true;
 						}
 					}
-				}else {
+				} else if(args[0].equalsIgnoreCase("setname")){
+					/*****************
+					 *    SETNAME    *
+					 *****************/
+					if(!hasPermission(player, "dropchest"))
+					{
+						player.sendMessage("You may not set names of Dropchests!");
+						return false;
+					} 
+					if(args.length==3){
+						int chestid = Integer.valueOf(args[1]);
+						String name = args[2];
+						DropChestItem item = getChestById(chestid);
+						if(item!=null){
+							item.setName(name);
+							save();
+						}
+					} else {
+						syntaxerror = true;
+					}
+				} else {
 					log.log(Level.INFO, "Command not found.");
 					syntaxerror = true;
 				}
@@ -477,16 +490,17 @@ public class DropChest extends JavaPlugin {
 				syntaxerror = true;
 			}
 			if(syntaxerror){
-				if(1==2&&onPermissionSend(sender, "dropchest", ChatColor.BLUE.toString()+"DropChest Usage:")){
+				if(onPermissionSend(sender, "dropchest", ChatColor.BLUE.toString()+"DropChest Commands:")){
 					sender.sendMessage(ChatColor.BLUE.toString()+"{this} is a required variable argument");
-					sender.sendMessage(ChatColor.BLUE.toString()+"[this] is an optional argument");
-					onPermissionSend(sender, "dropchest.create", " /dropchest add [radius]: Add a chest to the list, default radius is 2");
-					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chestid} : Remove a chest from the list");
-					onPermissionSend(sender, "dropchest.list", " /dropchest list [page] : Lists all DropChests");
-					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chestid} {radius} : Sets the suck-radius of the chest");
-					onPermissionSend(sender, "dropchest.which", " /dropchest which : Check if a Chest is a DropChest and which id it has");
-					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chestid} : Teleports you to DropChest with ID chestid");
-					onPermissionSend(sender, "dropchest.filter", "/dropchest filter {chestid} {suck|push|pull} {itemid|itemtype|clear} : Adds/Removes the given Item to/from the given filter or clears it");
+					sender.sendMessage(ChatColor.BLUE.toString()+"[this] can be omitted");
+					onPermissionSend(sender, "dropchest.create", " /dropchest add [radius=2]");
+					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chestid}");
+					onPermissionSend(sender, "dropchest.list", " /dropchest list [page=1]");
+					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chestid} {radius}");
+					onPermissionSend(sender, "dropchest.which", " /dropchest which");
+					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chestid}");
+					onPermissionSend(sender, "dropchest.filter", " /dropchest filter {suck|push|pull} [{chestid} {itemid|itemtype|clear}]");
+					onPermissionSend(sender, "dropchest", " /dropchest setname {chestid} {name}");
 					int max = getMaximumRadius(player);
 					String maxs = String.valueOf(max);
 					if(hasPermission(player, "dropchest.radius.setBig")||max==65536){

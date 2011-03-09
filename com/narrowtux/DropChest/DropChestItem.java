@@ -276,7 +276,11 @@ public class DropChestItem {
 					y = Double.valueOf(data[1]);
 					z = Double.valueOf(data[2]);
 					radius = Integer.valueOf(data[3]);
-					setMinecartAction(DropChestMinecartAction.valueOf(data[5]));
+					try{
+						setMinecartAction(DropChestMinecartAction.valueOf(data[5]));
+					} catch(java.lang.IllegalArgumentException e){
+						setMinecartAction(DropChestMinecartAction.IGNORE);
+					}
 					org.bukkit.World.Environment env = org.bukkit.World.Environment.NORMAL;
 					if(fileVersion.equals("0.3")){
 						env = org.bukkit.World.Environment.valueOf(data[6]);

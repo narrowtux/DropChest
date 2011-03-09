@@ -106,19 +106,25 @@ public class DropChest extends JavaPlugin {
 	}
 
 	private void load(){
-		File file = new File("plugins/DropChest.txt");
+		File dir = getDataFolder();
+		if(!dir.exists()){
+			log.log(Level.INFO, "DropChest directory does not exist. Creating on next save!");
+			return;
+		}
+		File file = new File(dir.getAbsolutePath()+"/DropChest.txt");
 		if(file.exists()){
 			FileInputStream input;
 			try {
-				input = new FileInputStream("plugins/DropChest.txt");
+				input = new FileInputStream(file.getAbsoluteFile());
 				InputStreamReader ir = new InputStreamReader(input);
 				BufferedReader r = new BufferedReader(ir);
 				String locline;
 				String version = "0.0";
 				while(true){
 					locline = r.readLine();
-					if(locline == null)
+					if(locline == null){
 						break;
+					}
 					if(locline.startsWith("#"))
 					{
 						continue;
@@ -148,21 +154,27 @@ public class DropChest extends JavaPlugin {
 
 
 	public void save(){
-		File file = new File("plugins/DropChest.txt");
+		File dir = getDataFolder();
+		if(!dir.exists()){
+			log.log(Level.INFO, "Creating DropChest directory.");
+			dir.mkdir();
+		}
+		File file = new File(dir.getAbsolutePath()+"/DropChest.txt");
 		if(!file.exists()){
-			log.log(Level.SEVERE, "no file. Trying to create it.");
+			log.log(Level.INFO, "no file. Trying to create it.");
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
+				return;
 			}
 		}
 		try {
-			FileOutputStream output = new FileOutputStream("plugins/DropChest.txt");
+			FileOutputStream output = new FileOutputStream(file.getAbsoluteFile());
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
 			w.write("version 0.6\n");
 			w.write("#LEGEND\n#x, y, z, radius, World-Name, nothing, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
-			w.write("#Filtered items are separated by ','. Name the items like the names in org.bukkit.Material, e.g. COBBLESTONE");
+			w.write("#Filtered items are separated by ','. Name the items like the names in org.bukkit.Material, e.g. COBBLESTONE\n");
 			for(DropChestItem dci : chests)
 			{
 				String line = dci.save();
@@ -174,6 +186,8 @@ public class DropChest extends JavaPlugin {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println("Unexpected error.");
 		}
 	}
 

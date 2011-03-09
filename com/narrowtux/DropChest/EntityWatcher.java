@@ -16,6 +16,7 @@ import org.bukkit.craftbukkit.entity.CraftItem;
 import net.minecraft.server.EntityItem;
 
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import com.narrowtux.DropChest.DropChest;
 
@@ -75,6 +76,7 @@ public class EntityWatcher extends TimerTask {
 								if(allin){
 									break;
 								}
+								continue;
 							}
 						}
 					}

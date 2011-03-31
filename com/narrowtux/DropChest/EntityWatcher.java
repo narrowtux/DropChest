@@ -3,8 +3,6 @@ package com.narrowtux.DropChest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
-import java.util.TimerTask;
-
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.block.Block;
@@ -16,12 +14,11 @@ import org.bukkit.craftbukkit.entity.CraftItem;
 import net.minecraft.server.EntityItem;
 
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 import com.narrowtux.DropChest.DropChest;
 
 
-public class EntityWatcher extends TimerTask {
+public class EntityWatcher implements Runnable {
 	private DropChest plugin;
 	private List<DropChestItem> chestsToBeRemoved;
 	public EntityWatcher(DropChest plugin) {

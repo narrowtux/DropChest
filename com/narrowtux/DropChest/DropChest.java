@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.Event.Type;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -44,7 +45,6 @@ public class DropChest extends JavaPlugin {
 	private final DropChestBlockListener blockListener = new DropChestBlockListener(this);
 	private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
 	private EntityWatcher entityWatcher;
-	private Timer entityTimer = new Timer();
 	private int requestedRadius;
 	private Player requestPlayer;
 	public PermissionHandler Permissions = null;
@@ -52,6 +52,7 @@ public class DropChest extends JavaPlugin {
 	private String version = "0.0";
 	private DropChestVehicleListener vehicleListener = new DropChestVehicleListener(this);
 	public Logger log;
+	private int watcherid;
 	public DropChest() {
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		requestedRadius = 2;
@@ -63,16 +64,13 @@ public class DropChest extends JavaPlugin {
 		log = getServer().getLogger();
 		setupPermissions();
 		entityWatcher = new EntityWatcher(this);
-		entityTimer.scheduleAtFixedRate(entityWatcher, 100, 1000);
+		watcherid = getServer().getScheduler().scheduleSyncRepeatingTask(this, entityWatcher, 20, 20);
 		// Register our events
 		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvent(Event.Type.BLOCK_INTERACT, blockListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
-		pm.registerEvent(Event.Type.BLOCK_DAMAGED, blockListener, Priority.Monitor, this);
-		pm.registerEvent(Event.Type.REDSTONE_CHANGE, blockListener, Priority.Normal, this);
+		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
-		//pm.registerEvent(Event.Type.VEHICLE_ENTER, vehicleListener, Priority.Normal, this);
-		// EXAMPLE: Custom code, here we just output some info so we can check all is well
+		
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
 		version = pdfFile.getVersion();
@@ -92,9 +90,9 @@ public class DropChest extends JavaPlugin {
 	}
 
 	public void setupPermissions() {
+		try{
 		Plugin test = this.getServer().getPluginManager().getPlugin("Permissions");
-
-
+		
 		if(this.Permissions == null) {
 			try{
 				this.Permissions = ((Permissions)test).getHandler();
@@ -102,6 +100,10 @@ public class DropChest extends JavaPlugin {
 				this.Permissions = null;
 				log.log(Level.WARNING, "Permissions is not enabled! All Operations are allowed!");
 			}
+		}
+		} catch(java.lang.NoClassDefFoundError e){
+			this.Permissions = null;
+			log.log(Level.WARNING, "Permissions not found! All Operations are allowed!");
 		}
 	}
 
@@ -206,8 +208,7 @@ public class DropChest extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		entityTimer.cancel();
-
+		getServer().getScheduler().cancelTask(watcherid);
 	}
 
 	public Boolean isNear(Location loc1, Location loc2, double maxDistance){

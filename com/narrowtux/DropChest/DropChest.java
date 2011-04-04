@@ -20,7 +20,6 @@ import org.bukkit.plugin.PluginManager;
 import com.narrowtux.DropChest.EntityWatcher;
 
 import java.util.ArrayList;
-import java.util.Timer;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,9 +39,9 @@ import org.bukkit.plugin.Plugin;
  */
 public class DropChest extends JavaPlugin {
 	private List<DropChestItem> chests = new ArrayList<DropChestItem>();
-	@SuppressWarnings("unused")
 	private final DropChestPlayerListener playerListener = new DropChestPlayerListener(this);
 	private final DropChestBlockListener blockListener = new DropChestBlockListener(this);
+	private final DropChestWorldListener worldListener = new DropChestWorldListener();
 	private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
 	private EntityWatcher entityWatcher;
 	private int requestedRadius;
@@ -57,6 +56,7 @@ public class DropChest extends JavaPlugin {
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		requestedRadius = 2;
 		DropChestPlayer.plugin = this;
+		DropChestWorldListener.plugin = this;
 	}
 
 
@@ -70,6 +70,7 @@ public class DropChest extends JavaPlugin {
 		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
+		pm.registerEvent(Type.CHUNK_UNLOAD, worldListener, Priority.Normal, this);
 		
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
@@ -325,7 +326,7 @@ public class DropChest extends JavaPlugin {
 					DropChestItem dci = getChestById(i);
 					if(dci!=null){
 						if(player!=null){
-							player.teleportTo(dci.getBlock().getLocation());
+							player.teleport(dci.getBlock().getLocation());
 						}
 					} else {
 						sender.sendMessage(ChatColor.RED.toString()+"This chest does not exist.");

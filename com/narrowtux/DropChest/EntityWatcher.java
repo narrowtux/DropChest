@@ -2,7 +2,7 @@ package com.narrowtux.DropChest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.block.Block;
@@ -40,20 +40,25 @@ public class EntityWatcher implements Runnable {
 						int count = eitem.a.count;
 						short damage = (short)eitem.a.damage;
 						ItemStack stack = new ItemStack(type, count, damage);
-						for(DropChestItem dci : plugin.getChests()){
-							Block block = dci.getBlock();
-							if(!DropChestItem.acceptsBlockType(block.getType())){
-								if(chestsToBeRemoved.contains(dci)){
-									plugin.getChests().remove(dci);
-									chestsToBeRemoved.remove(dci);
-									plugin.getServer().broadcastMessage(ChatColor.RED.toString()+"A DropChest was broken and has been removed.");
-								} else {
-									chestsToBeRemoved.add(dci);
-								}
-							} else if(chestsToBeRemoved.contains(dci)){
-								chestsToBeRemoved.remove(dci);
+						for(int i = 0; i<plugin.getChests().size();i++){
+							DropChestItem dci = plugin.getChests().get(i);
+							Location loc = dci.getLocation();
+							World world = loc.getWorld();
+							Block block = loc.getBlock();
+							int x, z;
+							x = loc.getBlockX()/16;
+							z = loc.getBlockZ()/16;
+							if(!world.isChunkLoaded(x, z)){
+								//Try to load the chunk.
+								world.loadChunk(x, z);
+								continue;
 							}
-							if(plugin.isNear(dci.getBlock().getLocation(), e.getLocation(), dci.getRadius())&&!chestsToBeRemoved.contains(dci))
+							if(!DropChestItem.acceptsBlockType(block.getType())){
+								//Try to load the chunk.
+								world.loadChunk(x, z);
+								continue;
+							}
+							if(plugin.isNear(dci.getBlock().getLocation(), e.getLocation(), dci.getRadius()))
 							{
 								HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
 								boolean allin = false;

@@ -30,6 +30,7 @@ public class DropChestItem {
 	private static int currentId = 1;
 	private String name = "";
 	private int id;
+	private Location loc = null;
 	public DropChestItem(ContainerBlock containerBlock, int radius, Block block, DropChest plugin)
 	{
 		this.containerBlock = containerBlock;
@@ -38,6 +39,7 @@ public class DropChestItem {
 		warnedFull = false;
 		this.plugin = plugin;
 		this.block = block;
+		loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 		id = currentId++;
 		List<Material> f = new ArrayList<Material>();
 		filter.put(FilterType.SUCK, f);
@@ -59,10 +61,16 @@ public class DropChestItem {
 		f = new ArrayList<Material>();
 		filter.put(FilterType.PULL, f);
 		load(loadString, fileVersion);
+		loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 	}
 
 	public ContainerBlock getChest() {
-		return containerBlock;
+		if(block.getState() instanceof ContainerBlock){
+			containerBlock = (ContainerBlock)block.getState();
+			return containerBlock;
+		} else {
+			return null;
+		}
 	}
 
 	public void setChest(Chest chest) {
@@ -123,6 +131,7 @@ public class DropChestItem {
 
 	public HashMap<Integer, ItemStack> addItem(ItemStack item, FilterType filterType)
 	{
+		getChest();
 		if(filter.get(filterType).size()==0&&filterType==FilterType.SUCK)
 			return containerBlock.getInventory().addItem(item);
 		else
@@ -539,5 +548,12 @@ public class DropChestItem {
 			return "#"+String.valueOf(id);
 		}
 		return name;
+	}
+
+	/**
+	 * @return the location
+	 */
+	public Location getLocation() {
+		return loc;
 	}
 }

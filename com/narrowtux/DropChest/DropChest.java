@@ -478,6 +478,7 @@ public class DropChest extends JavaPlugin {
 					DropChestItem item = getChestByIdOrName(args[1]);
 					if(item!=null){
 						item.setName(name);
+						sender.sendMessage(ChatColor.GREEN+"Set name to "+item.getName());
 						save();
 					}
 				} else {

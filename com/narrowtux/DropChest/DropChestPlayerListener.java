@@ -30,53 +30,40 @@ public class DropChestPlayerListener extends PlayerListener {
 			if(dplayer!=null&&!dplayer.getChestRequestType().equals(ChestRequestType.NONE)){
 				Block b = event.getClickedBlock();
 				if(DropChestItem.acceptsBlockType(b.getType())){
-					ContainerBlock chest = (ContainerBlock)b.getState();
-					int radius = dplayer.getRequestedRadius();
-					if(radius < 2)
-						radius = 2;
 					List<DropChestItem> chests = plugin.getChests();
-					boolean chestexists = false;
-					int chestid = 0;
-					DropChestItem chestdci = null;
-					int i = 0;
-					for(DropChestItem dcic : chests){
-						Block block = b;
-						if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
-							chestexists = true;
-							chestdci = dcic;
-							chestid = i;
-							break;
-						}
-						i++;
-					}
-					if(!chestexists&&dplayer.getChestRequestType().equals(ChestRequestType.CREATE)){
-						DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
-						chests.add(dci);
-						if(event.getPlayer()!=null)
-						{
-							event.getPlayer().sendMessage("Activated DropChest on this Chest");
-						}
-					}
-					if(dplayer.getChestRequestType().equals(ChestRequestType.WHICH)){
-						if(chestdci!=null){
-							dplayer.getPlayer().sendMessage("ID: "+String.valueOf(chestid+1)+" Radius: "+String.valueOf(chestdci.getRadius()));
-							String acceptstring = "";
-							for(FilterType type:FilterType.values()){
-								acceptstring+=type.toString()+": ";
-								for(Material m:chestdci.getFilter(type)){
-									acceptstring+=m.toString() + ", ";
-								}
+					DropChestItem chestdci = plugin.getChestByBlock(b);
+					
+					switch(dplayer.getChestRequestType()){
+					case CREATE:
+						if(chestdci==null){
+							ContainerBlock chest = (ContainerBlock)b.getState();
+							int radius = dplayer.getRequestedRadius();
+							if(radius < 2)
+								radius = 2;
+							
+							DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
+							
+							chests.add(dci);
+							
+							if(event.getPlayer()!=null)
+							{
+								event.getPlayer().sendMessage("Created DropChest. ID: #"+dci.getId());
 							}
-							dplayer.getPlayer().sendMessage(acceptstring);
-
+							plugin.save();
+						} else {
+							dplayer.getPlayer().sendMessage(ChatColor.RED+"This DropChest already exists. ID: #"+chestdci.getId());
+						}
+						break;
+					case WHICH:
+						if(chestdci!=null){
+							dplayer.getPlayer().sendMessage(chestdci.listString());
 						} else {
 							dplayer.getPlayer().sendMessage("This is not a DropChest!");
 						}
+						break;
 					}
 					dplayer.setChestRequestType(ChestRequestType.NONE);
-					plugin.save();
 					event.setCancelled(true);
-					System.out.println("DropChest activated on "+String.valueOf(chests.size())+" Chests");
 				}
 			}
 		} else if(event.getAction()==Action.LEFT_CLICK_BLOCK){

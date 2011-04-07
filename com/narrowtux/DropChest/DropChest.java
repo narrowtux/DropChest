@@ -71,7 +71,7 @@ public class DropChest extends JavaPlugin {
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
 		pm.registerEvent(Type.CHUNK_UNLOAD, worldListener, Priority.Normal, this);
-		
+
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
 		version = pdfFile.getVersion();
@@ -92,16 +92,16 @@ public class DropChest extends JavaPlugin {
 
 	public void setupPermissions() {
 		try{
-		Plugin test = this.getServer().getPluginManager().getPlugin("Permissions");
-		
-		if(this.Permissions == null) {
-			try{
-				this.Permissions = ((Permissions)test).getHandler();
-			} catch(Exception e) {
-				this.Permissions = null;
-				log.log(Level.WARNING, "Permissions is not enabled! All Operations are allowed!");
+			Plugin test = this.getServer().getPluginManager().getPlugin("Permissions");
+
+			if(this.Permissions == null) {
+				try{
+					this.Permissions = ((Permissions)test).getHandler();
+				} catch(Exception e) {
+					this.Permissions = null;
+					log.log(Level.WARNING, "Permissions is not enabled! All Operations are allowed!");
+				}
 			}
-		}
 		} catch(java.lang.NoClassDefFoundError e){
 			this.Permissions = null;
 			log.log(Level.WARNING, "Permissions not found! All Operations are allowed!");
@@ -230,301 +230,285 @@ public class DropChest extends JavaPlugin {
 		if(sender.getClass().getName().contains("Player")){
 			player = (Player)sender;
 		}
-		if(cmd.getName().equalsIgnoreCase("dropchest")||cmd.getName().equalsIgnoreCase("dc"))
+		if(cmd.getName().equals("dropchest"))
 		{
 			boolean syntaxerror=false;
 			if(!hasPermission(player, "dropchest")){
 				player.sendMessage("You may not use DropChest. Please ask your Operator to enable this awesome plugin for you.");
 				return false;
 			}
-			if(args.length >= 1&&args.length <= 4){
-				
-				
-				
-				if(args[0].equalsIgnoreCase("add")){
-					/*****************
-					 *      ADD      *
-					 *****************/
-					if(!hasPermission(player, "dropchest.create")){
-						player.sendMessage("You may not create DropChests.");
-						return false;
+			if(args[0].equalsIgnoreCase("add")){
+				/*****************
+				 *      ADD      *
+				 *****************/
+				if(!hasPermission(player, "dropchest.create")){
+					player.sendMessage("You may not create DropChests.");
+					return false;
+				}
+				DropChestPlayer player2 = DropChestPlayer.getPlayerByName(player.getName());
+				player2.setChestRequestType(ChestRequestType.CREATE);
+				if(sender.getClass().getName().contains("Player"))
+					requestPlayer = (Player)sender;
+				else
+					requestPlayer = null;
+				if(args.length==2&&hasPermission(player, "dropchest.radius.set")){
+					requestedRadius = (int)Integer.valueOf(args[1]);
+					if(requestedRadius>getMaximumRadius(player)&&!hasPermission(player, "dropchest.radius.setBig")){
+						requestedRadius = getMaximumRadius(player);
 					}
-					DropChestPlayer player2 = DropChestPlayer.getPlayerByName(player.getName());
-					player2.setChestRequestType(ChestRequestType.CREATE);
-					if(sender.getClass().getName().contains("Player"))
-						requestPlayer = (Player)sender;
-					else
-						requestPlayer = null;
-					if(args.length==2&&hasPermission(player, "dropchest.radius.set")){
-						requestedRadius = (int)Integer.valueOf(args[1]);
-						if(requestedRadius>getMaximumRadius(player)&&!hasPermission(player, "dropchest.radius.setBig")){
-							requestedRadius = getMaximumRadius(player);
-						}
-					}
-					player2.setRequestedRadius(requestedRadius);
-					requestedRadius = 2;
-					sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on the Chest that you want to add");
-				} else if(args[0].equalsIgnoreCase("remove")){
-					/*****************
-					 *     REMOVE    *
-					 *****************/
-					if(!hasPermission(player, "dropchest.remove")){
-						player.sendMessage("You may not remove DropChests.");
-						return false;
-					}
-					if(args.length==2){
-						int chestid = Integer.valueOf(args[1]);
-						DropChestItem dci = getChestById(chestid);
-						if(dci!=null){
-							chests.remove(dci);
-							save();
-							sender.sendMessage(ChatColor.RED.toString()+"Removed Chest.");
-						} else {
-							syntaxerror = true;
-						}
-					} else {
-						syntaxerror = true;
-					}
-				} else if(args[0].equalsIgnoreCase("list")){
-					/*****************
-					 *      LIST     *
-					 *****************/
-					if(!hasPermission(player, "dropchest.list")){
-						player.sendMessage("You may not list DropChests.");
-						return false;
-					}
-					int i = 1;
-
-					//Page limit is 6 items per page
-					//calculation of needed pages
-					int num = chests.size();
-					int needed = (int) Math.ceil((double)num/6.0);
-					int current = 1;
-					if(args.length==2){
-						current = Integer.valueOf(args[1]);
-					}
-					if(current>needed)
-						current = 1;
-					if(needed!=1){
-						sender.sendMessage(ChatColor.BLUE.toString()+"Page "+String.valueOf(current)+" of "+ String.valueOf(needed));
-					}
-					sender.sendMessage(ChatColor.BLUE.toString()+"Name | % full | filters | radius");
-					sender.sendMessage(ChatColor.BLUE.toString()+"------");
-					for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
-						sender.sendMessage(chests.get(i).listString());
-					}
-
-				} else if(args[0].equalsIgnoreCase("tp")){
-					/*****************
-					 *   TELEPORT    *
-					 *****************/
-					if(!hasPermission(player, "dropchest.teleport")){
-						player.sendMessage("You may not teleport to DropChests.");
-						return false;
-					}
-					int i = Integer.valueOf(args[1]);
-					DropChestItem dci = getChestById(i);
+				}
+				player2.setRequestedRadius(requestedRadius);
+				requestedRadius = 2;
+				sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on the Chest that you want to add");
+			} else if(args[0].equalsIgnoreCase("remove")){
+				/*****************
+				 *     REMOVE    *
+				 *****************/
+				if(!hasPermission(player, "dropchest.remove")){
+					player.sendMessage("You may not remove DropChests.");
+					return false;
+				}
+				if(args.length==2){
+					DropChestItem dci = getChestByIdOrName(args[1]);
 					if(dci!=null){
-						if(player!=null){
-							player.teleport(dci.getBlock().getLocation());
-						}
+						chests.remove(dci);
+						save();
+						sender.sendMessage(ChatColor.RED.toString()+"Removed Chest.");
 					} else {
-						sender.sendMessage(ChatColor.RED.toString()+"This chest does not exist.");
+						sender.sendMessage(ChatColor.RED+"Dropchest not found.");
 					}
-				} else if(args[0].equalsIgnoreCase("setradius")){
-					/*****************
-					 *   SETRADIUS   *
-					 *****************/
-					if(!hasPermission(player, "dropchest.radius.set")){
-						player.sendMessage("You may not set the radius of a DropChest.");
-						return false;
-					}
-					if(args.length==3){
-						int chestid = Integer.valueOf(args[1]);
-						int radius = Integer.valueOf(args[2]);
-						DropChestItem dci = getChestById(chestid);
-						if(dci != null){
-							boolean force=true;
-							if(!hasPermission(player, "dropchest.radius.setBig")){
-								force =  false;
-							}
-							if(radius>getMaximumRadius(player)&&!force){
-								radius = getMaximumRadius(player);
-							}
-							dci.setRadius(radius);
-							sender.sendMessage("Radius of Chest #"+String.valueOf(chestid)+" set to "+String.valueOf(dci.getRadius()));
-							setChests(chests);
-						} else {
-							syntaxerror = true;
-						}
-					} else {
-						syntaxerror = true;
-					}
-				} else if(args[0].equalsIgnoreCase("which")){
-					/*****************
-					 *     WHICH     *
-					 *****************/
-					if(!hasPermission(player, "dropchest.which")){
-						player.sendMessage("You may not ask if this is a DropChest.");
-						return false;
-					}
-					if(player != null){
-						DropChestPlayer pl = DropChestPlayer.getPlayerByName(player.getName());
-						pl.setChestRequestType(ChestRequestType.WHICH);
-						sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its id");
-					}
+				} else {
+					syntaxerror = true;
+				}
+			} else if(args[0].equalsIgnoreCase("list")){
+				/*****************
+				 *      LIST     *
+				 *****************/
+				if(!hasPermission(player, "dropchest.list")){
+					player.sendMessage("You may not list DropChests.");
+					return false;
+				}
+				int i = 1;
 
-				}else if(args[0].equalsIgnoreCase("filter")){
-					/*****************
-					 *     FILTER    *
-					 *****************/
-					if(!hasPermission(player, "dropchest.filter"))
-					{
-						player.sendMessage("You may not use DropChest filters!");
-						return false;
-					} 
-					//dropchest filter {suck|push|pull|finish} [{chestid} {itemid|itemtype|clear}]
-					DropChestPlayer dplayer = null;
+				//Page limit is 6 items per page
+				//calculation of needed pages
+				int num = chests.size();
+				int needed = (int) Math.ceil((double)num/6.0);
+				int current = 1;
+				if(args.length==2){
+					current = Integer.valueOf(args[1]);
+				}
+				if(current>needed)
+					current = 1;
+				if(needed!=1){
+					sender.sendMessage(ChatColor.BLUE.toString()+"Page "+String.valueOf(current)+" of "+ String.valueOf(needed));
+				}
+				sender.sendMessage(ChatColor.BLUE.toString()+"Name | % full | filters | radius");
+				sender.sendMessage(ChatColor.BLUE.toString()+"------");
+				for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
+					sender.sendMessage(chests.get(i).listString());
+				}
+
+			} else if(args[0].equalsIgnoreCase("tp")){
+				/*****************
+				 *   TELEPORT    *
+				 *****************/
+				if(!hasPermission(player, "dropchest.teleport")){
+					player.sendMessage("You may not teleport to DropChests.");
+					return false;
+				}
+				DropChestItem dci = getChestByIdOrName(args[1]);
+				if(dci!=null){
 					if(player!=null){
-						dplayer = DropChestPlayer.getPlayerByName(player.getName());
+						player.teleport(dci.getBlock().getLocation());
 					}
-					if(args.length>=2){
-						String typestring = args[1];
-						FilterType type = null;
-						try{
-							type = FilterType.valueOf(typestring.toUpperCase());
-						} catch(java.lang.IllegalArgumentException e){
-							type = null;
+				} else {
+					sender.sendMessage(ChatColor.RED.toString()+"This chest does not exist.");
+				}
+			} else if(args[0].equalsIgnoreCase("setradius")){
+				/*****************
+				 *   SETRADIUS   *
+				 *****************/
+				if(!hasPermission(player, "dropchest.radius.set")){
+					player.sendMessage("You may not set the radius of a DropChest.");
+					return false;
+				}
+				if(args.length==3){
+					int radius = Integer.valueOf(args[2]);
+					DropChestItem dci = getChestByIdOrName(args[1]);
+					if(dci != null){
+						boolean force=true;
+						if(!hasPermission(player, "dropchest.radius.setBig")){
+							force =  false;
 						}
-						if(type!=null){
-							if(args.length==2&&dplayer!=null){
-								dplayer.setEditingFilter(true);
-								dplayer.setEditingFilterType(type);
-								dplayer.getPlayer().sendMessage(ChatColor.GREEN.toString()+"You're now entering interactive mode for filtering "+type.toString().toLowerCase()+"ed items");
-							} else if(dplayer==null&&args.length==2) {
-								sender.sendMessage("You can't use interactive mode from a console!");
-							} else if(args.length==4) {
-								String cheststring = args[2];
-								String itemstring = args[3];
-								Integer chestid = null;
-								try{
-									chestid = Integer.valueOf(cheststring);
-								} catch (java.lang.NumberFormatException e){
-									chestid = null;
-								}
-								if(chestid!=null){
-									DropChestItem chest = getChestById(chestid);
-									Material item = null;
-									if(itemstring.equalsIgnoreCase("clear")){
-										chest.getFilter(type).clear();
-										sender.sendMessage(ChatColor.GREEN.toString()+"Filter cleared.");
-									} else {
-										try{
-											item = Material.valueOf(itemstring.toUpperCase());
-										} catch (java.lang.IllegalArgumentException e){
-											item = null;
-										}
-										boolean materialNotFound = false;
-										if(item==null){
-											Integer itemid = null;
-											try{
-												itemid = Integer.valueOf(itemstring);
-											} catch(java.lang.NumberFormatException e)
-											{
-												itemid = null;
-											}
-											if(itemid!=null){
-												item = Material.getMaterial(itemid);
-												if(item==null){
-													materialNotFound = true;
-												}
-											} else {
-												materialNotFound = true;
-											}
-										}
-										if(!materialNotFound){
-											List<Material> filter = chest.getFilter(type);
-											if(filter.contains(item)){
-												filter.remove(item);
-												sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is no more being "+type.toString().toLowerCase()+"ed.");
-											} else {
-												filter.add(item);
-												sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is now being "+type.toString().toLowerCase()+"ed.");
-											}
-										} else {
-											sender.sendMessage("Material "+itemstring+" not found.");
-										}
-										save();
-									}
-								} else {
-									log.log(Level.INFO,"No such chest "+cheststring+".");
-									syntaxerror = true;
-								}
-							} else {
-								log.log(Level.INFO,"Too much arguments.");
-								syntaxerror = true;
-							}
-						} else if(typestring.equalsIgnoreCase("finish")) {
-							if(dplayer!=null)
-							{
-								dplayer.setEditingFilter(false);
-								dplayer.getPlayer().sendMessage(ChatColor.GREEN.toString()+"You're now leaving interactive mode!");
-							} else {
-								sender.sendMessage("You can't use interactive mode from a console!");
-							}
-						} else {
-							log.log(Level.INFO,"Filter type not found.");
-							syntaxerror = true;
+						if(radius>getMaximumRadius(player)&&!force){
+							radius = getMaximumRadius(player);
 						}
-					}
-				} else if(args[0].equalsIgnoreCase("setname")){
-					/*****************
-					 *    SETNAME    *
-					 *****************/
-					if(!hasPermission(player, "dropchest"))
-					{
-						player.sendMessage("You may not set names of Dropchests!");
-						return false;
-					} 
-					if(args.length==3){
-						int chestid = Integer.valueOf(args[1]);
-						String name = args[2];
-						DropChestItem item = getChestById(chestid);
-						if(item!=null){
-							item.setName(name);
-							save();
-						}
+						dci.setRadius(radius);
+						sender.sendMessage("Radius of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getRadius()));
+						setChests(chests);
 					} else {
 						syntaxerror = true;
 					}
 				} else {
-					log.log(Level.INFO, "Command not found.");
+					syntaxerror = true;
+				}
+			} else if(args[0].equalsIgnoreCase("which")){
+				/*****************
+				 *     WHICH     *
+				 *****************/
+				if(!hasPermission(player, "dropchest.which")){
+					player.sendMessage("You may not use this command.");
+					return false;
+				}
+				if(player != null){
+					DropChestPlayer pl = DropChestPlayer.getPlayerByName(player.getName());
+					pl.setChestRequestType(ChestRequestType.WHICH);
+					sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its id");
+				}
+
+			}else if(args[0].equalsIgnoreCase("filter")){
+				/*****************
+				 *     FILTER    *
+				 *****************/
+				if(!hasPermission(player, "dropchest.filter"))
+				{
+					player.sendMessage("You may not use DropChest filters!");
+					return false;
+				} 
+				//dropchest filter {suck|push|pull|finish} [{chestid} {itemid|itemtype|clear}]
+				DropChestPlayer dplayer = null;
+				if(player!=null){
+					dplayer = DropChestPlayer.getPlayerByName(player.getName());
+				}
+				if(args.length>=2){
+					String typestring = args[1];
+					FilterType type = null;
+					try{
+						type = FilterType.valueOf(typestring.toUpperCase());
+					} catch(java.lang.IllegalArgumentException e){
+						type = null;
+					}
+					if(type!=null){
+						if(args.length==2&&dplayer!=null){
+							dplayer.setEditingFilter(true);
+							dplayer.setEditingFilterType(type);
+							dplayer.getPlayer().sendMessage(ChatColor.GREEN.toString()+"You're now entering interactive mode for filtering "+type.toString().toLowerCase()+"ed items");
+						} else if(dplayer==null&&args.length==2) {
+							sender.sendMessage("You can't use interactive mode from a console!");
+						} else if(args.length==4) {
+							String itemstring = args[3];
+							DropChestItem chest = getChestByIdOrName(args[2]);
+							Material item = null;
+							if(itemstring.equalsIgnoreCase("clear")){
+								chest.getFilter(type).clear();
+								sender.sendMessage(ChatColor.GREEN.toString()+"Filter cleared.");
+							} else {
+								if(chest!=null){
+									try{
+										item = Material.valueOf(itemstring.toUpperCase());
+									} catch (java.lang.IllegalArgumentException e){
+										item = null;
+									}
+									boolean materialNotFound = false;
+									if(item==null){
+										Integer itemid = null;
+										try{
+											itemid = Integer.valueOf(itemstring);
+										} catch(java.lang.NumberFormatException e)
+										{
+											itemid = null;
+										}
+										if(itemid!=null){
+											item = Material.getMaterial(itemid);
+											if(item==null){
+												materialNotFound = true;
+											}
+										} else {
+											materialNotFound = true;
+										}
+									}
+									if(!materialNotFound){
+										List<Material> filter = chest.getFilter(type);
+										if(filter.contains(item)){
+											filter.remove(item);
+											sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is no more being "+type.toString().toLowerCase()+"ed.");
+										} else {
+											filter.add(item);
+											sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is now being "+type.toString().toLowerCase()+"ed.");
+										}
+									} else {
+										sender.sendMessage("Material "+itemstring+" not found.");
+									}
+									save();
+
+								} else {
+									log.log(Level.INFO,"No such chest "+args[1]+".");
+									syntaxerror = true;
+								}
+							}
+						} else {
+							log.log(Level.INFO,"Too much arguments.");
+							syntaxerror = true;
+						}
+					} else if(typestring.equalsIgnoreCase("finish")) {
+						if(dplayer!=null)
+						{
+							dplayer.setEditingFilter(false);
+							dplayer.getPlayer().sendMessage(ChatColor.GREEN.toString()+"You're now leaving interactive mode!");
+						} else {
+							sender.sendMessage("You can't use interactive mode from a console!");
+						}
+					} else {
+						log.log(Level.INFO,"Filter type not found.");
+						syntaxerror = true;
+					}
+				}
+			} else if(args[0].equalsIgnoreCase("setname")){
+				/*****************
+				 *    SETNAME    *
+				 *****************/
+				if(!hasPermission(player, "dropchest"))
+				{
+					player.sendMessage("You may not set names of Dropchests!");
+					return false;
+				} 
+				if(args.length==3){
+					String name = args[2];
+					DropChestItem item = getChestByIdOrName(args[1]);
+					if(item!=null){
+						item.setName(name);
+						save();
+					}
+				} else {
 					syntaxerror = true;
 				}
 			} else {
-				log.log(Level.INFO, "Argument count invalid.");
+				log.log(Level.INFO, "Command not found.");
 				syntaxerror = true;
 			}
+
 			if(syntaxerror){
 				if(onPermissionSend(sender, "dropchest", ChatColor.BLUE.toString()+"DropChest Commands:")){
 					sender.sendMessage(ChatColor.BLUE.toString()+"{this} is a required variable argument");
 					sender.sendMessage(ChatColor.BLUE.toString()+"[this] can be omitted");
+					sender.sendMessage(ChatColor.BLUE.toString()+"{chest} can be either a name or an id");
 					onPermissionSend(sender, "dropchest.create", " /dropchest add [radius=2]");
-					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chestid}");
+					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chest}");
 					onPermissionSend(sender, "dropchest.list", " /dropchest list [page=1]");
-					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chestid} {radius}");
+					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chest} {radius}");
 					onPermissionSend(sender, "dropchest.which", " /dropchest which");
-					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chestid}");
-					onPermissionSend(sender, "dropchest.filter", " /dropchest filter {suck|push|pull} [{chestid} {itemid|itemtype|clear}]");
-					onPermissionSend(sender, "dropchest", " /dropchest setname {chestid} {name}");
+					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chest}");
+					onPermissionSend(sender, "dropchest.filter", " /dropchest filter {suck|push|pull} [{chest} {itemid|itemtype|clear}]");
+					onPermissionSend(sender, "dropchest", " /dropchest setname {chest} {name}");
 					int max = getMaximumRadius(player);
 					String maxs = String.valueOf(max);
 					if(hasPermission(player, "dropchest.radius.setBig")||max==65536){
 						maxs = "unlimited";
 					}
 					sender.sendMessage("Your maximum radius is "+maxs);
+
 				}
-				log.log(Level.WARNING,"Syntax error.");
 			}
 		}
 		return false;
@@ -545,7 +529,7 @@ public class DropChest extends JavaPlugin {
 			if(Permissions==null){
 				return 65536;
 			}
-			int max = Permissions.getPermissionInteger(player.getName(), "dropchestmaxradius");
+			int max = Permissions.getUserPermissionInteger(player.getName(), "dropchestmaxradius","20");
 			if(max==-1){
 				max = 20;
 			}
@@ -613,7 +597,7 @@ public class DropChest extends JavaPlugin {
 		}
 		return null;
 	}
-	
+
 	public DropChestItem getChestById(int id){
 		for(DropChestItem dci : chests)
 		{
@@ -622,6 +606,29 @@ public class DropChest extends JavaPlugin {
 			}
 		}
 		return null;
+	}
+
+	public DropChestItem getChestByIdOrName(String arg){
+		int id = 0;
+		DropChestItem dci = null;
+		try{
+			id = Integer.valueOf(arg);
+			dci = getChestById(id);
+		} catch(Exception e){
+			dci = getChestByName(arg);
+		}
+		return dci;
+	}
+
+	public DropChestItem getChestByName(String name){
+		DropChestItem dci = null;
+		for(DropChestItem d:chests){
+			if(d.getName().equalsIgnoreCase(name)){
+				dci = d;
+				break;
+			}
+		}
+		return dci;
 	}
 }
 

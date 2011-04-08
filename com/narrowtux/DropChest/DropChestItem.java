@@ -61,7 +61,9 @@ public class DropChestItem {
 		f = new ArrayList<Material>();
 		filter.put(FilterType.PULL, f);
 		load(loadString, fileVersion);
-		loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
+		if(block != null){
+			loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
+		}
 	}
 
 	public ContainerBlock getChest() {
@@ -132,8 +134,9 @@ public class DropChestItem {
 	public HashMap<Integer, ItemStack> addItem(ItemStack item, FilterType filterType)
 	{
 		getChest();
-		if(filter.get(filterType).size()==0&&filterType==FilterType.SUCK)
+		if(filter.get(filterType).size()==0&&filterType==FilterType.SUCK){
 			return containerBlock.getInventory().addItem(item);
+		}
 		else
 		{
 			for(Material m : filter.get(filterType))

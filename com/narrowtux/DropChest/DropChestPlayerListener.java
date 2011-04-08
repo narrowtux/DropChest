@@ -56,7 +56,7 @@ public class DropChestPlayerListener extends PlayerListener {
 						break;
 					case WHICH:
 						if(chestdci!=null){
-							dplayer.getPlayer().sendMessage(chestdci.listString());
+							dplayer.getPlayer().sendMessage(chestdci.getId()+": "+chestdci.listString());
 						} else {
 							dplayer.getPlayer().sendMessage("This is not a DropChest!");
 						}

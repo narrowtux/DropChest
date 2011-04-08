@@ -46,8 +46,8 @@ public class EntityWatcher implements Runnable {
 								world.loadChunk(x, z);
 								continue;
 							}
-							Vector distance = dci.getBlock().getLocation().toVector().add(new Vector(0.5,0.5,0.5)).subtract(item.getLocation().toVector());
-							if(distance.lengthSquared()< dci.getRadius()*dci.getRadius())
+							Vector distance = dci.getBlock().getLocation().toVector().add(new Vector(0.5,0,0.5)).subtract(item.getLocation().toVector());
+							if(distance.lengthSquared() < 1.0*dci.getRadius()*dci.getRadius() + 1)
 							{
 								ItemStack stack = item.getItemStack();
 								System.out.println(stack);

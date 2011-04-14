@@ -175,7 +175,7 @@ public class DropChest extends JavaPlugin {
 		try {
 			FileOutputStream output = new FileOutputStream(file.getAbsoluteFile());
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
-			w.write("version 0.6\n");
+			w.write("version 0.7\n");
 			w.write("#LEGEND\n#x, y, z, radius, World-Name, nothing, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
 			w.write("#Filtered items are separated by ','. Name the items like the names in org.bukkit.Material, e.g. COBBLESTONE\n");
 			for(DropChestItem dci : chests)
@@ -210,6 +210,7 @@ public class DropChest extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getServer().getScheduler().cancelTask(watcherid);
+		save();
 	}
 
 	public Boolean isNear(Location loc1, Location loc2, double maxDistance){
@@ -488,20 +489,42 @@ public class DropChest extends JavaPlugin {
 						syntaxerror = true;
 					}
 				} else if(args[0].equalsIgnoreCase("protect")){
-					if(args.length==2){
+					if(args.length==3){
 						String cheststring = args[1];
 						String mode = args[2];
 						DropChestItem item = getChestByIdOrName(cheststring);
-						if(mode.equalsIgnoreCase("off")){
-							
-						} else if(mode.equalsIgnoreCase("on")){
-							
-						} else {
+						if(item==null){
+							sender.sendMessage("This chest does not exist.");
 							return false;
 						}
-						return true;
+						if(player.getName().equals(item.getOwner())){
+							if(mode.equalsIgnoreCase("off")){
+								item.setProtect(false);
+							} else if(mode.equalsIgnoreCase("on")){
+								item.setProtect(true);
+							} else {
+								syntaxerror = true;
+							}
+						}
 					}
-				} else {
+				} else if(args[0].equalsIgnoreCase("setowner")){ 
+					if(args.length==3){
+						String cheststring = args[1];
+						String newowner = args[2];
+						DropChestItem item = getChestByIdOrName(cheststring);
+						if(item==null){
+							sender.sendMessage("Chest not found.");
+						}
+						if(sender.isOp()||player.getName().equals(item.getOwner())){
+							item.setOwner(newowner);
+							sender.sendMessage("Owner of chest "+item.getId()+" set to "+newowner+".");
+						} else {
+							sender.sendMessage("That's not your chest!");
+						}
+					} else {
+						syntaxerror = true;
+					}
+				}else {
 					log.log(Level.INFO, "Command not found.");
 					syntaxerror = true;
 				}

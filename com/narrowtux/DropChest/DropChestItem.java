@@ -18,21 +18,22 @@ import org.bukkit.inventory.ItemStack;
 public class DropChestItem {
 	private ContainerBlock containerBlock;
 	private Block block;
-
+	
 	private int radius;
-
+	private String owner = "";
+	private boolean protect = false;
+	private String name = "";
+	private int id;
+	private HashMap<FilterType,List<Material > > filter = new HashMap<FilterType,List<Material> >();
+	
 	private boolean warnedNearlyFull;
 	private boolean warnedFull;
-	private String owner = "player";
-	private boolean protect = false;
 	private DropChest plugin;
-	private HashMap<FilterType,List<Material > > filter = new HashMap<FilterType,List<Material> >();
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
 	private boolean loadedProperly = true;
 	private static int currentId = 1;
-	private String name = "";
-	private int id;
 	private Location loc = null;
+	
 	public DropChestItem(ContainerBlock containerBlock, int radius, Block block, DropChest plugin)
 	{
 		this.containerBlock = containerBlock;
@@ -319,6 +320,7 @@ public class DropChestItem {
 						setName(data[8]);
 					}
 					if(fileVersion.equals("0.7")&&data.length>=11){
+						System.out.println("Owner found.");
 						setOwner(data[9]);
 						setProtect(Boolean.valueOf(data[10]));
 					}
@@ -364,8 +366,8 @@ public class DropChestItem {
 		line += "," + String.valueOf(loc.getWorld().getEnvironment());
 		line += "," + String.valueOf(id);
 		line += "," + name;
-		line += "," + owner;
-		line += "," + String.valueOf(protect);
+		line += "," + getOwner();
+		line += "," + String.valueOf(isProtect());
 		//Filter saving
 		for(FilterType type : FilterType.values()){
 			line += ";";
@@ -383,6 +385,7 @@ public class DropChestItem {
 			}
 		}
 		line+="\n";
+		System.out.print(line);
 		return line;
 	}
 

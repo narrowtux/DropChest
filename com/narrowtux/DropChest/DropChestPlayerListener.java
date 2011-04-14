@@ -23,6 +23,7 @@ public class DropChestPlayerListener extends PlayerListener {
 
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event){
 		if(event.getAction()==Action.RIGHT_CLICK_BLOCK){
@@ -32,6 +33,12 @@ public class DropChestPlayerListener extends PlayerListener {
 				if(DropChestItem.acceptsBlockType(b.getType())){
 					List<DropChestItem> chests = plugin.getChests();
 					DropChestItem chestdci = plugin.getChestByBlock(b);
+					
+					if(chestdci.isProtect()&&(!chestdci.getOwner().equals(dplayer.getPlayer().getName()))){
+						event.setCancelled(true);
+						dplayer.getPlayer().sendMessage("That's not your chest");
+						return;
+					}
 					
 					switch(dplayer.getChestRequestType()){
 					case CREATE:
@@ -44,6 +51,9 @@ public class DropChestPlayerListener extends PlayerListener {
 							DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
 							
 							chests.add(dci);
+							
+							dci.setOwner(dplayer.getPlayer().getName());
+							dci.setProtect(false);
 							
 							if(event.getPlayer()!=null)
 							{
@@ -60,7 +70,8 @@ public class DropChestPlayerListener extends PlayerListener {
 							String filterString = "";
 							ret+="ID: "+ChatColor.YELLOW+chestdci.getId()+ChatColor.WHITE+
 							" Name: "+ChatColor.YELLOW+chestdci.getName()+
-							ChatColor.WHITE+" Radius: "+ChatColor.YELLOW+chestdci.getRadius()+"\n";
+							ChatColor.WHITE+" Radius: "+ChatColor.YELLOW+chestdci.getRadius()+
+							ChatColor.WHITE+" Owner: "+ChatColor.YELLOW+chestdci.getOwner()+"\n";
 							for(FilterType type:FilterType.values()){
 								List<Material> filter = chestdci.getFilter(type);
 								if(filter.size()!=0)

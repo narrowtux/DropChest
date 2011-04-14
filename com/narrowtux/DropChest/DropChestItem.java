@@ -23,6 +23,8 @@ public class DropChestItem {
 
 	private boolean warnedNearlyFull;
 	private boolean warnedFull;
+	private String owner = "player";
+	private boolean protect = false;
 	private DropChest plugin;
 	private HashMap<FilterType,List<Material > > filter = new HashMap<FilterType,List<Material> >();
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
@@ -239,7 +241,7 @@ public class DropChestItem {
 			} else {
 				loadedProperly = false;
 			}
-		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")||fileVersion.equals("0.6")){
+		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")||fileVersion.equals("0.6")||fileVersion.equals("0.7")){
 			String splt[] = loadString.split(";");
 			if(splt.length>=1){
 				String data[] = splt[0].split(",");
@@ -313,8 +315,12 @@ public class DropChestItem {
 					} else {
 						id = currentId++;
 					}
-					if(fileVersion.equals("0.6")&&data.length>=9){
+					if((fileVersion.equals("0.6")||fileVersion.equals("0.7"))&&data.length>=9){
 						setName(data[8]);
+					}
+					if(fileVersion.equals("0.7")&&data.length>=11){
+						setOwner(data[9]);
+						setProtect(Boolean.valueOf(data[10]));
 					}
 					if(world!=null){
 						Block b = world.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
@@ -350,7 +356,7 @@ public class DropChestItem {
 
 	public String save()
 	{
-		// VERSION!!!! 0.6
+		// VERSION!!!! 0.7
 		String line = "";
 		Location loc = block.getLocation();
 		line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(getRadius()) + "," + String.valueOf(loc.getWorld().getName());
@@ -358,6 +364,8 @@ public class DropChestItem {
 		line += "," + String.valueOf(loc.getWorld().getEnvironment());
 		line += "," + String.valueOf(id);
 		line += "," + name;
+		line += "," + owner;
+		line += "," + String.valueOf(protect);
 		//Filter saving
 		for(FilterType type : FilterType.values()){
 			line += ";";
@@ -558,5 +566,33 @@ public class DropChestItem {
 	 */
 	public Location getLocation() {
 		return loc;
+	}
+
+	/**
+	 * @param owner the owner to set
+	 */
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
+	/**
+	 * @return the owner
+	 */
+	public String getOwner() {
+		return owner;
+	}
+
+	/**
+	 * @param protect the protect to set
+	 */
+	public void setProtect(boolean protect) {
+		this.protect = protect;
+	}
+
+	/**
+	 * @return the protect
+	 */
+	public boolean isProtect() {
+		return protect;
 	}
 }

@@ -56,7 +56,46 @@ public class DropChestPlayerListener extends PlayerListener {
 						break;
 					case WHICH:
 						if(chestdci!=null){
-							dplayer.getPlayer().sendMessage(chestdci.getId()+": "+chestdci.listString());
+							String ret = ChatColor.WHITE.toString();
+							String filterString = "";
+							ret+="ID: "+ChatColor.YELLOW+chestdci.getId()+ChatColor.WHITE+
+							" Name: "+ChatColor.YELLOW+chestdci.getName()+
+							ChatColor.WHITE+" Radius: "+ChatColor.YELLOW+chestdci.getRadius()+"\n";
+							for(FilterType type:FilterType.values()){
+								List<Material> filter = chestdci.getFilter(type);
+								if(filter.size()!=0)
+								{
+									filterString+=ChatColor.AQUA+type.toString()+":\n";
+									boolean useId = false;
+									if(filter.size()<5){
+										useId = false;
+									} else {
+										useId = true;
+									}
+									for(int i = 0; i<filter.size();i++){
+										Material m = filter.get(i);
+										filterString+=ChatColor.YELLOW.toString();
+										if(useId){
+											filterString+=m.getId();
+										} else {
+											filterString+=m.toString();
+										}
+										if(i+1!=filter.size()){
+											filterString+=ChatColor.WHITE+", ";
+										} else {
+											filterString+=ChatColor.WHITE+"\n";
+										}
+									}
+								}
+							}
+							if(!filterString.equals("")){
+								ret+=ChatColor.AQUA+"Filters:\n";
+								ret+=filterString;
+							}
+							String strings[] = ret.split("\n");
+							for (String val:strings){
+								dplayer.getPlayer().sendMessage(val);
+							}
 						} else {
 							dplayer.getPlayer().sendMessage("This is not a DropChest!");
 						}

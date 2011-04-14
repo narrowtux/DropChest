@@ -50,7 +50,6 @@ public class EntityWatcher implements Runnable {
 							if(distance.lengthSquared() < 1.0*dci.getRadius()*dci.getRadius() + 1)
 							{
 								ItemStack stack = item.getItemStack();
-								System.out.println(stack);
 								HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
 								boolean allin = false;
 								if(ret.size()==0){

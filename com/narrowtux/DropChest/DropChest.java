@@ -367,7 +367,7 @@ public class DropChest extends JavaPlugin {
 					if(player != null){
 						DropChestPlayer pl = DropChestPlayer.getPlayerByName(player.getName());
 						pl.setChestRequestType(ChestRequestType.WHICH);
-						sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its id");
+						sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its properties.");
 					}
 	
 				}else if(args[0].equalsIgnoreCase("filter")){
@@ -378,7 +378,7 @@ public class DropChest extends JavaPlugin {
 					{
 						player.sendMessage("You may not use DropChest filters!");
 						return false;
-					} 
+					}
 					//dropchest filter {suck|push|pull|finish} [{chestid} {itemid|itemtype|clear}]
 					DropChestPlayer dplayer = null;
 					if(player!=null){
@@ -487,6 +487,20 @@ public class DropChest extends JavaPlugin {
 					} else {
 						syntaxerror = true;
 					}
+				} else if(args[0].equalsIgnoreCase("protect")){
+					if(args.length==2){
+						String cheststring = args[1];
+						String mode = args[2];
+						DropChestItem item = getChestByIdOrName(cheststring);
+						if(mode.equalsIgnoreCase("off")){
+							
+						} else if(mode.equalsIgnoreCase("on")){
+							
+						} else {
+							return false;
+						}
+						return true;
+					}
 				} else {
 					log.log(Level.INFO, "Command not found.");
 					syntaxerror = true;
@@ -514,6 +528,33 @@ public class DropChest extends JavaPlugin {
 					sender.sendMessage("Your maximum radius is "+maxs);
 
 				}
+			}
+		}
+		if(cmd.getName().equals("item")){
+			if(args.length==1){
+				int id = 0;
+				Material m = null;
+				try{
+					id = Integer.valueOf(args[0]);
+				} catch(Exception e){
+					m = Material.matchMaterial(args[0].toUpperCase());
+				}
+				if(id!=0){
+					m = Material.getMaterial(id);
+					if(m!=null){
+						sender.sendMessage(ChatColor.YELLOW.toString()+id+ChatColor.WHITE+" is "+ChatColor.YELLOW.toString()+m.toString());
+					} else {
+						sender.sendMessage(ChatColor.RED+"That item does not exist.");
+					}
+				} else {
+					if(m!=null){
+						id = m.getId();
+						sender.sendMessage(ChatColor.YELLOW+m.toString()+ChatColor.WHITE+" is "+ChatColor.YELLOW+id);
+					} else {
+						sender.sendMessage(ChatColor.RED+"That item does not exist.");
+					}
+				}
+				return true;
 			}
 		}
 		return false;

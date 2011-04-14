@@ -20,13 +20,13 @@ public class DropChestBlockListener extends BlockListener {
 			for(DropChestItem dci : plugin.getChests())
 			{
 				if(plugin.locationsEqual(dci.getBlock().getLocation(),block.getLocation())){
-					if(!plugin.hasPermission(event.getPlayer(), "dropchest.destroy")){
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(ChatColor.RED+"You need to remove this DropChest before breaking it");
-					} else {
+					if(dci.getOwner().equals(event.getPlayer().getName())){
 						plugin.getChests().remove(dci);
 						event.getPlayer().sendMessage(ChatColor.GREEN+"Removed Dropchest.");
+					} else {
+						event.getPlayer().sendMessage("That's not your chest.");
 					}
+					break;
 				}
 			}
 		}

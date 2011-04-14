@@ -275,9 +275,13 @@ public class DropChest extends JavaPlugin {
 					if(args.length==2){
 						DropChestItem dci = getChestByIdOrName(args[1]);
 						if(dci!=null){
-							chests.remove(dci);
-							save();
-							sender.sendMessage(ChatColor.RED.toString()+"Removed Chest.");
+							if(ownsChest(dci, sender)){
+								chests.remove(dci);
+								save();
+								sender.sendMessage(ChatColor.RED.toString()+"Removed Chest.");
+							} else {
+								sender.sendMessage("That's not your chest.");
+							}
 						} else {
 							sender.sendMessage(ChatColor.RED+"Dropchest not found.");
 						}
@@ -341,16 +345,20 @@ public class DropChest extends JavaPlugin {
 						int radius = Integer.valueOf(args[2]);
 						DropChestItem dci = getChestByIdOrName(args[1]);
 						if(dci != null){
-							boolean force=true;
-							if(!hasPermission(player, "dropchest.radius.setBig")){
-								force =  false;
+							if(ownsChest(dci, sender)){
+								boolean force=true;
+								if(!hasPermission(player, "dropchest.radius.setBig")){
+									force =  false;
+								}
+								if(radius>getMaximumRadius(player)&&!force){
+									radius = getMaximumRadius(player);
+								}
+								dci.setRadius(radius);
+								sender.sendMessage("Radius of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getRadius()));
+								setChests(chests);
+							} else {
+								sender.sendMessage("That's not your chest.");
 							}
-							if(radius>getMaximumRadius(player)&&!force){
-								radius = getMaximumRadius(player);
-							}
-							dci.setRadius(radius);
-							sender.sendMessage("Radius of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getRadius()));
-							setChests(chests);
 						} else {
 							syntaxerror = true;
 						}
@@ -405,46 +413,55 @@ public class DropChest extends JavaPlugin {
 								DropChestItem chest = getChestByIdOrName(args[2]);
 								Material item = null;
 								if(itemstring.equalsIgnoreCase("clear")){
-									chest.getFilter(type).clear();
-									sender.sendMessage(ChatColor.GREEN.toString()+"Filter cleared.");
+									if(ownsChest(chest, sender)){
+										chest.getFilter(type).clear();
+										sender.sendMessage(ChatColor.GREEN.toString()+"Filter cleared.");
+									} else {
+										sender.sendMessage("That's not your chest.");
+									}
 								} else {
 									if(chest!=null){
-										try{
-											item = Material.valueOf(itemstring.toUpperCase());
-										} catch (java.lang.IllegalArgumentException e){
-											item = null;
-										}
-										boolean materialNotFound = false;
-										if(item==null){
-											Integer itemid = null;
+										if(ownsChest(chest, sender)){
 											try{
-												itemid = Integer.valueOf(itemstring);
-											} catch(java.lang.NumberFormatException e)
-											{
-												itemid = null;
+												item = Material.valueOf(itemstring.toUpperCase());
+											} catch (java.lang.IllegalArgumentException e){
+												item = null;
 											}
-											if(itemid!=null){
-												item = Material.getMaterial(itemid);
-												if(item==null){
+											boolean materialNotFound = false;
+											if(item==null){
+												Integer itemid = null;
+												try{
+													itemid = Integer.valueOf(itemstring);
+												} catch(java.lang.NumberFormatException e)
+												{
+													itemid = null;
+												}
+												if(itemid!=null){
+													item = Material.getMaterial(itemid);
+													if(item==null){
+														materialNotFound = true;
+													}
+												} else {
 													materialNotFound = true;
 												}
-											} else {
-												materialNotFound = true;
 											}
-										}
-										if(!materialNotFound){
-											List<Material> filter = chest.getFilter(type);
-											if(filter.contains(item)){
-												filter.remove(item);
-												sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is no more being "+type.toString().toLowerCase()+"ed.");
+											if(!materialNotFound){
+												List<Material> filter = chest.getFilter(type);
+												if(filter.contains(item)){
+													filter.remove(item);
+													sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is no more being "+type.toString().toLowerCase()+"ed.");
+												} else {
+													filter.add(item);
+													sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is now being "+type.toString().toLowerCase()+"ed.");
+												}
 											} else {
-												filter.add(item);
-												sender.sendMessage(ChatColor.GREEN.toString()+item.toString()+" is now being "+type.toString().toLowerCase()+"ed.");
+												sender.sendMessage("Material "+itemstring+" not found.");
 											}
+											save();
 										} else {
-											sender.sendMessage("Material "+itemstring+" not found.");
+											sender.sendMessage("That's not your chest.");
 										}
-										save();
+										
 	
 									} else {
 										log.log(Level.INFO,"No such chest "+args[1]+".");
@@ -481,9 +498,13 @@ public class DropChest extends JavaPlugin {
 						String name = args[2];
 						DropChestItem item = getChestByIdOrName(args[1]);
 						if(item!=null){
-							item.setName(name);
-							sender.sendMessage(ChatColor.GREEN+"Set name to "+item.getName());
-							save();
+							if(ownsChest(item, sender)){
+								item.setName(name);
+								sender.sendMessage(ChatColor.GREEN+"Set name to "+item.getName());
+								save();
+							} else {
+								sender.sendMessage("That's not your chest.");
+							}
 						}
 					} else {
 						syntaxerror = true;
@@ -497,7 +518,7 @@ public class DropChest extends JavaPlugin {
 							sender.sendMessage("This chest does not exist.");
 							return false;
 						}
-						if(player.getName().equals(item.getOwner())){
+						if(ownsChest(item, sender)){
 							if(mode.equalsIgnoreCase("off")){
 								item.setProtect(false);
 							} else if(mode.equalsIgnoreCase("on")){
@@ -505,6 +526,7 @@ public class DropChest extends JavaPlugin {
 							} else {
 								syntaxerror = true;
 							}
+							save();
 						}
 					}
 				} else if(args[0].equalsIgnoreCase("setowner")){ 
@@ -514,9 +536,11 @@ public class DropChest extends JavaPlugin {
 						DropChestItem item = getChestByIdOrName(cheststring);
 						if(item==null){
 							sender.sendMessage("Chest not found.");
+							return false;
 						}
-						if(sender.isOp()||player.getName().equals(item.getOwner())){
+						if(ownsChest(item, sender)){
 							item.setOwner(newowner);
+							save();
 							sender.sendMessage("Owner of chest "+item.getId()+" set to "+newowner+".");
 						} else {
 							sender.sendMessage("That's not your chest!");
@@ -698,6 +722,25 @@ public class DropChest extends JavaPlugin {
 			}
 		}
 		return dci;
+	}
+	
+	public boolean ownsChest(DropChestItem dci, CommandSender sender){
+		if(sender.isOp()){
+			return true;
+		} 
+		if(sender instanceof Player){
+			Player p = (Player)sender;
+			if(dci.getOwner().equals(p.getName())){
+				return true;
+			}
+			if(hasPermission(p, "dropchest.moderator")){
+				return true;
+			}
+		}
+		if(dci.getOwner().equals("")){
+			return true;
+		}
+		return false;
 	}
 }
 

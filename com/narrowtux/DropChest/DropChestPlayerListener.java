@@ -27,19 +27,22 @@ public class DropChestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event){
 		if(event.getAction()==Action.RIGHT_CLICK_BLOCK){
+			if(event.isCancelled()){
+				return;
+			}
 			DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(event.getPlayer().getName());
-			if(dplayer!=null&&!dplayer.getChestRequestType().equals(ChestRequestType.NONE)){
-				Block b = event.getClickedBlock();
-				if(DropChestItem.acceptsBlockType(b.getType())){
-					List<DropChestItem> chests = plugin.getChests();
-					DropChestItem chestdci = plugin.getChestByBlock(b);
-					
-					if(chestdci.isProtect()&&(!chestdci.getOwner().equals(dplayer.getPlayer().getName()))){
-						event.setCancelled(true);
-						dplayer.getPlayer().sendMessage("That's not your chest");
-						return;
-					}
-					
+			Block b = event.getClickedBlock();
+			if(DropChestItem.acceptsBlockType(b.getType())){
+				List<DropChestItem> chests = plugin.getChests();
+				DropChestItem chestdci = plugin.getChestByBlock(b);
+
+				if(chestdci.isProtect()&&(!chestdci.getOwner().equals(dplayer.getPlayer().getName()))){
+					event.setCancelled(true);
+					dplayer.getPlayer().sendMessage("That's not your chest");
+					return;
+				}
+
+				if(dplayer!=null&&!dplayer.getChestRequestType().equals(ChestRequestType.NONE)){
 					switch(dplayer.getChestRequestType()){
 					case CREATE:
 						if(chestdci==null){
@@ -47,14 +50,14 @@ public class DropChestPlayerListener extends PlayerListener {
 							int radius = dplayer.getRequestedRadius();
 							if(radius < 2)
 								radius = 2;
-							
+
 							DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
-							
+
 							chests.add(dci);
-							
+
 							dci.setOwner(dplayer.getPlayer().getName());
 							dci.setProtect(false);
-							
+
 							if(event.getPlayer()!=null)
 							{
 								event.getPlayer().sendMessage("Created DropChest. ID: #"+dci.getId());

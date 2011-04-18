@@ -607,7 +607,7 @@ public class DropChestItem {
 	 * @return the lastRedstoneDrop
 	 */
 	public long getLastRedstoneDrop() {
-		return lastRedstoneDrop;
+		return lastRedstoneDrop/1000;
 	}
 
 

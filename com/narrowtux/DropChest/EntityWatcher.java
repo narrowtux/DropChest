@@ -32,7 +32,7 @@ public class EntityWatcher implements Runnable {
 						for(int i = 0; i<plugin.getChests().size();i++){
 							DropChestItem dci = plugin.getChests().get(i);
 							Date date = new Date();
-							if(date.getTime()-plugin.config.getIdleTimeAfterRedstone()<dci.getLastRedstoneDrop()){
+							if(date.getTime()/1000-plugin.config.getIdleTimeAfterRedstone()<dci.getLastRedstoneDrop()){
 								//skip chest because it hasn't been waiting so long.
 								continue;
 							}

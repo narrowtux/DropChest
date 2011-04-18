@@ -1,5 +1,6 @@
 package com.narrowtux.DropChest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -33,7 +34,8 @@ public class DropChestItem {
 	private boolean loadedProperly = true;
 	private static int currentId = 1;
 	private Location loc = null;
-	
+	private long lastRedstoneDrop = 0;
+
 	public DropChestItem(ContainerBlock containerBlock, int radius, Block block, DropChest plugin)
 	{
 		this.containerBlock = containerBlock;
@@ -197,7 +199,8 @@ public class DropChestItem {
 				containerBlock.getInventory().remove(item);
 			}
 		}
-		System.out.println("Dropped all items");
+		Date date = new Date();
+		lastRedstoneDrop = date.getTime();
 	}
 
 	private void load(String loadString, String fileVersion)
@@ -598,4 +601,14 @@ public class DropChestItem {
 	public boolean isProtect() {
 		return protect;
 	}
+	
+	
+	/**
+	 * @return the lastRedstoneDrop
+	 */
+	public long getLastRedstoneDrop() {
+		return lastRedstoneDrop;
+	}
+
+
 }

@@ -36,6 +36,9 @@ public class DropChestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockRedstoneChange(BlockRedstoneEvent event){
+		if(!plugin.config.isDropItemsOnRedstone()){
+			return;
+		}
 		if(event.getNewCurrent()==0){
 			return;
 		}

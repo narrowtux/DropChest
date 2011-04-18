@@ -9,10 +9,12 @@ import java.util.HashMap;
 
 public class FlatFileReader {
 	private File file;
+	private boolean caseSensitive;
 	private HashMap<String, String> keySet = new HashMap<String,String>();
 	
-	public FlatFileReader(File file){
+	public FlatFileReader(File file, boolean caseSensitive){
 		this.file = file;
+		this.caseSensitive = caseSensitive;
 		reload();
 	}
 	
@@ -27,10 +29,12 @@ public class FlatFileReader {
 			try{
 				ret = Integer.valueOf(keySet.get(key));
 			} catch(Exception e){
+				System.out.println("Error with parsing "+keySet.get(key)+" for key "+key);
 				ret = fallback;
 			}
 			return ret;
 		} else {
+			System.out.println("Key "+key+" not found.");
 			return fallback;
 		}
 	}
@@ -101,6 +105,9 @@ public class FlatFileReader {
 						if(splt.length==2){
 							String key = splt[0];
 							String value = splt[1];
+							if(!caseSensitive){
+								key = key.toLowerCase();
+							}
 							keySet.put(key, value);
 						}
 					}
@@ -110,6 +117,7 @@ public class FlatFileReader {
 				e.printStackTrace();
 			}
 		} else {
+			System.out.println("File "+file.getAbsoluteFile()+" not found.");
 			return false;
 		}
 		return true;

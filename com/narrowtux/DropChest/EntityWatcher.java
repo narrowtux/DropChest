@@ -1,5 +1,6 @@
 package com.narrowtux.DropChest;
 
+import java.util.Date;
 import java.util.HashMap;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -30,6 +31,11 @@ public class EntityWatcher implements Runnable {
 						Item item = (Item)e;
 						for(int i = 0; i<plugin.getChests().size();i++){
 							DropChestItem dci = plugin.getChests().get(i);
+							Date date = new Date();
+							if(date.getTime()-plugin.config.getIdleTimeAfterRedstone()<dci.getLastRedstoneDrop()){
+								//skip chest because it hasn't been waiting so long.
+								continue;
+							}
 							Location loc = dci.getLocation();
 							World world = loc.getWorld();
 							Block block = loc.getBlock();

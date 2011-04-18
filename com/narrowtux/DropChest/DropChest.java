@@ -52,6 +52,8 @@ public class DropChest extends JavaPlugin {
 	private DropChestVehicleListener vehicleListener = new DropChestVehicleListener(this);
 	public Logger log;
 	private int watcherid;
+	public Configuration config;
+	
 	public DropChest() {
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		requestedRadius = 2;
@@ -76,10 +78,16 @@ public class DropChest extends JavaPlugin {
 		pm.registerEvent(Type.CHUNK_UNLOAD, worldListener, Priority.Normal, this);
 		pm.registerEvent(Type.REDSTONE_CHANGE, blockListener, Priority.Normal, this);
 		
-		//Read Plugin file
+		//Read plugin file
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
 		version = pdfFile.getVersion();
+		
+		//Read configuration
+		File settings = new File(getDataFolder().getAbsolutePath()+"/dropchest.cfg");
+		config = new Configuration(settings);
+		requestedRadius = config.getDefaultRadius();
+		
 		// Load our stuff
 		load();
 	}
@@ -267,7 +275,7 @@ public class DropChest extends JavaPlugin {
 						}
 					}
 					player2.setRequestedRadius(requestedRadius);
-					requestedRadius = 2;
+					requestedRadius = config.getDefaultRadius();
 					sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on the Chest that you want to add");
 				} else if(args[0].equalsIgnoreCase("remove")){
 					/*****************
@@ -632,7 +640,7 @@ public class DropChest extends JavaPlugin {
 			}
 			int max = Permissions.getUserPermissionInteger(player.getName(), "dropchestmaxradius","20");
 			if(max==-1){
-				max = 20;
+				max = config.getFallbackRadius();
 			}
 			return max;
 		}

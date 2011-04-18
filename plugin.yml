@@ -8,6 +8,6 @@ commands:
   description: Access to all DropChest related commands
   aliases:
       - dc
- item:
+ dcitem:
   description: Gives you the name or the id of the passed item.
-  usage: /item [NAME|id]
+  usage: /dcitem [NAME|id]

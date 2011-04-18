@@ -63,15 +63,20 @@ public class DropChest extends JavaPlugin {
 	public void onEnable() {
 		log = getServer().getLogger();
 		setupPermissions();
+		
+		//Register the Entity Watcher
 		entityWatcher = new EntityWatcher(this);
 		watcherid = getServer().getScheduler().scheduleSyncRepeatingTask(this, entityWatcher, 20, 20);
+		
 		// Register our events
 		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
+		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
 		pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
-		pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
+		pm.registerEvent(Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
 		pm.registerEvent(Type.CHUNK_UNLOAD, worldListener, Priority.Normal, this);
-
+		pm.registerEvent(Type.REDSTONE_CHANGE, blockListener, Priority.Normal, this);
+		
+		//Read Plugin file
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
 		version = pdfFile.getVersion();
@@ -518,7 +523,11 @@ public class DropChest extends JavaPlugin {
 							sender.sendMessage("This chest does not exist.");
 							return false;
 						}
-						if(ownsChest(item, sender)){
+						boolean mayProtect = true;
+						if(sender instanceof Player){
+							mayProtect = hasPermission((Player)sender, "dropchest.protect");
+						}
+						if(ownsChest(item, sender)&&mayProtect){
 							if(mode.equalsIgnoreCase("off")){
 								item.setProtect(false);
 							} else if(mode.equalsIgnoreCase("on")){
@@ -573,11 +582,10 @@ public class DropChest extends JavaPlugin {
 						maxs = "unlimited";
 					}
 					sender.sendMessage("Your maximum radius is "+maxs);
-
 				}
 			}
 		}
-		if(cmd.getName().equals("item")){
+		if(cmd.getName().equals("dcitem")){
 			if(args.length==1){
 				int id = 0;
 				Material m = null;

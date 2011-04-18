@@ -1,9 +1,11 @@
 package com.narrowtux.DropChest;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.ChatColor;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
+import org.bukkit.event.block.BlockRedstoneEvent;
 /**
  * DropChest block listener
  * @author narrowtux
@@ -29,6 +31,32 @@ public class DropChestBlockListener extends BlockListener {
 					break;
 				}
 			}
+		}
+	}
+	
+	@Override
+	public void onBlockRedstoneChange(BlockRedstoneEvent event){
+		if(event.getNewCurrent()==0){
+			return;
+		}
+		Block block = event.getBlock();
+		BlockFace faces[] = {BlockFace.NORTH,BlockFace.EAST,BlockFace.SOUTH,BlockFace.WEST};
+		for(BlockFace face:faces){
+			Block chest = block.getFace(face);
+			if(DropChestItem.acceptsBlockType(chest.getType())){
+				DropChestItem dci = plugin.getChestByBlock(chest);
+				if(dci!=null){
+					dci.dropAll();
+					return;
+				}
+			}
+		}
+		Block chest = null;
+		chest = block.getFace(BlockFace.UP).getFace(BlockFace.UP);
+		DropChestItem dci = plugin.getChestByBlock(chest);
+		if(dci!=null){
+			dci.dropAll();
+			return;
 		}
 	}
 }

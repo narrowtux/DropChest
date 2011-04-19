@@ -96,15 +96,22 @@ public class DropChestItem {
 
 	public double getPercentFull(){
 		Inventory inv = containerBlock.getInventory();
-		int fullstacks = 0;
 		int stacks = inv.getSize();
+		int maxStackSize = 0;
+		int totalItems = 0;
 		for(int j = 0; j<stacks; j++){
 			ItemStack istack = inv.getItem(j);
-			if(istack.getAmount()!=0){
-				fullstacks++;
+			if(istack!=null){
+				totalItems+=istack.getAmount();
+				if(istack.getTypeId()==0){
+					maxStackSize+=64;
+				} else {
+					maxStackSize+=istack.getMaxStackSize();
+				}
 			}
+			
 		}
-		double percent = (double)fullstacks/(double)stacks;
+		double percent = (double)totalItems/(double)maxStackSize;
 		if(percent<0.8)
 			warnedNearlyFull = false;
 		return percent;

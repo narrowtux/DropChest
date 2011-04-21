@@ -29,12 +29,10 @@ public class FlatFileReader {
 			try{
 				ret = Integer.valueOf(keySet.get(key));
 			} catch(Exception e){
-				System.out.println("Error with parsing "+keySet.get(key)+" for key "+key);
 				ret = fallback;
 			}
 			return ret;
 		} else {
-			System.out.println("Key "+key+" not found.");
 			return fallback;
 		}
 	}

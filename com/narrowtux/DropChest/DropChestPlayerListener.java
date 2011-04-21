@@ -23,7 +23,6 @@ public class DropChestPlayerListener extends PlayerListener {
 
 	}
 
-	@SuppressWarnings("unused")
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event){
 		if(event.getAction().equals(Action.RIGHT_CLICK_BLOCK)){

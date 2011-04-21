@@ -19,7 +19,7 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
 
 public class DropChestVehicleListener extends VehicleListener {
 	private DropChest plugin;
-	private boolean alreadyfixed =false;
+	private boolean alreadyfixed = false;
 
 	public DropChestVehicleListener(DropChest plugin) {
 		this.plugin = plugin;
@@ -30,18 +30,18 @@ public class DropChestVehicleListener extends VehicleListener {
 	{
 		if(event.getVehicle() instanceof Minecart)
 		{
-			if(event.getVehicle() instanceof StorageMinecart&&!alreadyfixed){
-				plugin.log.log(Level.FINEST, "THEY FIXED MINECARTS :) Please tell narrowtux!");
+			if(event.getVehicle() instanceof StorageMinecart && !alreadyfixed){
+				plugin.log.log(Level.INFO, "THEY FIXED MINECARTS :) Please tell narrowtux!");
 				alreadyfixed = true;
 			}
 			EntityMinecart minecart = (EntityMinecart)((CraftMinecart)event.getVehicle()).getHandle();
 			/*
-			 * EntityMinecart.d means the type of the minecart
-			 * d == 0 means a normal minecart
-			 * d == 1 means a storage minecart
-			 * d == 2 means a powered minecart
+			 * EntityMinecart.type means the type of the minecart
+			 *  0 means a normal minecart
+			 *  1 means a storage minecart
+			 *  2 means a powered minecart
 			 */
-			if(minecart.d == 1){
+			if(minecart.type == 1){
 				CraftStorageMinecart storage = new CraftStorageMinecart((CraftServer)plugin.getServer(), minecart);
 				for(DropChestItem dci : plugin.getChests()){
 

@@ -542,8 +542,10 @@ public class DropChest extends JavaPlugin {
 						if(ownsChest(item, sender)&&mayProtect){
 							if(mode.equalsIgnoreCase("off")){
 								item.setProtect(false);
+								sender.sendMessage("Chest is not anymore protected.");
 							} else if(mode.equalsIgnoreCase("on")){
 								item.setProtect(true);
+								sender.sendMessage("Chest is now protected.");
 							} else {
 								syntaxerror = true;
 							}

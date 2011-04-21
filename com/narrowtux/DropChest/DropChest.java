@@ -531,6 +531,10 @@ public class DropChest extends JavaPlugin {
 							sender.sendMessage("This chest does not exist.");
 							return false;
 						}
+						if(!config.isLetUsersProtectChests()){
+							sender.sendMessage("Chest protection is disabled on this server.");
+							return false;
+						}
 						boolean mayProtect = true;
 						if(sender instanceof Player){
 							mayProtect = hasPermission((Player)sender, "dropchest.protect");

@@ -197,6 +197,9 @@ public class DropChestItem {
 	}
 
 	public void dropAll(){
+		if(isProtect()){
+			return;
+		}
 		World world = block.getWorld();
 		Location loc = block.getLocation();
 		for(int i = 0; i<containerBlock.getInventory().getSize();i++){
@@ -606,6 +609,9 @@ public class DropChestItem {
 	 * @return the protect
 	 */
 	public boolean isProtect() {
+		if(!plugin.config.isLetUsersProtectChests()){
+			return false;
+		}
 		return protect;
 	}
 	

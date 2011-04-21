@@ -550,6 +550,8 @@ public class DropChest extends JavaPlugin {
 								syntaxerror = true;
 							}
 							save();
+						} else {
+							sender.sendMessage("You may not set this attribute.");
 						}
 					}
 				} else if(args[0].equalsIgnoreCase("setowner")){ 

@@ -10,6 +10,8 @@ public class Configuration {
 	private int defaultRadius;
 	private int fallbackRadius;
 	private int idleTimeAfterRedstone;
+	private double warnFillStatus;
+	private String warnString;
 
 	public Configuration(File file){
 		this.file = file;
@@ -23,6 +25,8 @@ public class Configuration {
 		defaultRadius = reader.getInteger("defaultradius", 2);
 		fallbackRadius = reader.getInteger("fallbackradius", 20);
 		idleTimeAfterRedstone = reader.getInteger("waitafterdrop", 10);
+		warnFillStatus = reader.getDouble("warnfillstatus", 80);
+		warnString = reader.getString("warnmessage", "Your chest $name is nearly full($fill%)");
 	}
 
 	/**
@@ -58,5 +62,19 @@ public class Configuration {
 	 */
 	public int getFallbackRadius() {
 		return fallbackRadius;
+	}
+
+	/**
+	 * @return the warnFillStatus
+	 */
+	public double getWarnFillStatus() {
+		return warnFillStatus;
+	}
+
+	/**
+	 * @return the warnString
+	 */
+	public String getWarnString() {
+		return warnString;
 	}
 }

@@ -13,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.craftbukkit.entity.CraftStorageMinecart;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,7 +29,6 @@ public class DropChestItem {
 	private HashMap<FilterType,List<Material > > filter = new HashMap<FilterType,List<Material> >();
 	
 	private boolean warnedNearlyFull;
-	private boolean warnedFull;
 	private DropChest plugin;
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
 	private boolean loadedProperly = true;
@@ -41,7 +41,6 @@ public class DropChestItem {
 		this.containerBlock = containerBlock;
 		this.radius = radius;
 		warnedNearlyFull = false;
-		warnedFull = false;
 		this.plugin = plugin;
 		this.block = block;
 		loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
@@ -58,7 +57,6 @@ public class DropChestItem {
 	{
 		this.plugin = plugin;
 		warnedNearlyFull = false;
-		warnedFull = false;
 		List<Material> f = new ArrayList<Material>();
 		filter.put(FilterType.SUCK, f);
 		f = new ArrayList<Material>();
@@ -112,30 +110,24 @@ public class DropChestItem {
 			
 		}
 		double percent = (double)totalItems/(double)maxStackSize;
-		if(percent<0.8)
+		if(percent<plugin.config.getWarnFillStatus()/100)
 			warnedNearlyFull = false;
 		return percent;
 	}
 
-	public boolean isFull(){
-		boolean full = getPercentFull() == 1.0;
-		if(!full)
-			warnedFull = false;
-		return full;
-	}
-
 	public void warnNearlyFull(){
 		if(!warnedNearlyFull){
-			plugin.getServer().broadcastMessage("Warning! Chest "+getName()+" is nearly full.");
+			String warnString = plugin.config.getWarnString();
+			warnString = warnString.replaceAll("\\$name", getName());
+			warnString = warnString.replaceAll("\\$fill", String.valueOf((int)(getPercentFull()*100.0)));
+			warnString = warnString.replaceAll("\\$owner", getOwner());
+			Player player = plugin.getServer().getPlayer(getOwner());
+			if(player!=null&&player.isOnline()){
+				player.sendMessage(warnString);
+			} else {
+				plugin.getServer().broadcastMessage(warnString);
+			}
 			warnedNearlyFull = true;
-		}
-	}
-
-	public void warnFull(){
-		if(!warnedFull)
-		{
-			plugin.getServer().broadcastMessage("Warning! Chest "+getName()+" is full.");
-			warnedFull = true;
 		}
 	}
 

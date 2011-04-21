@@ -68,9 +68,7 @@ public class EntityWatcher implements Runnable {
 									}
 									item.setItemStack(stack);
 								}
-								if(dci.isFull())
-									dci.warnFull();
-								else if(dci.getPercentFull()>=0.8)
+								if(dci.getPercentFull()>=plugin.config.getWarnFillStatus()/100.0)
 									dci.warnNearlyFull();
 								if(allin){
 									break;

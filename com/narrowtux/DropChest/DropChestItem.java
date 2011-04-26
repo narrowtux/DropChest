@@ -325,7 +325,6 @@ public class DropChestItem {
 						setName(data[8]);
 					}
 					if(fileVersion.equals("0.7")&&data.length>=11){
-						System.out.println("Owner found.");
 						setOwner(data[9]);
 						setProtect(Boolean.valueOf(data[10]));
 					}
@@ -390,7 +389,6 @@ public class DropChestItem {
 			}
 		}
 		line+="\n";
-		System.out.print(line);
 		return line;
 	}
 

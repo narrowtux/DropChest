@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 public class DropChestPlayer {
 	private Player player = null;
+	private String playerName = "";
 	private FilterType editingFilterType = FilterType.SUCK;
 	private int requestedRadius = 2;
 	private ChestRequestType chestRequestType = ChestRequestType.NONE;
@@ -25,6 +26,7 @@ public class DropChestPlayer {
 
 	public DropChestPlayer(Player p){
 		player = p;
+		playerName = p.getName();
 	}
 	
 	
@@ -52,7 +54,7 @@ public class DropChestPlayer {
 		this.chestRequestType = chestRequestType;
 	}
 	public Player getPlayer() {
-		return player;
+		return plugin.getServer().getPlayer(playerName);
 	}
 	
 	public void setPlayer(Player player) {
@@ -72,5 +74,11 @@ public class DropChestPlayer {
 		}
 		plugin.log.log(Level.WARNING,"Player "+name+" not found.");
 		return null;
+	}
+	
+	public void sendMessage(String message){
+		for(String line:message.split("\n")){
+			getPlayer().sendMessage(line);
+		}
 	}
 }

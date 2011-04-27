@@ -107,10 +107,10 @@ public class DropChestPlayerListener extends PlayerListener {
 							}
 							String strings[] = ret.split("\n");
 							for (String val:strings){
-								dplayer.getPlayer().sendMessage(val);
+								event.getPlayer().sendMessage(val);
 							}
 						} else {
-							dplayer.getPlayer().sendMessage("This is not a DropChest!");
+							event.getPlayer().sendMessage("This is not a DropChest!");
 						}
 						break;
 					}

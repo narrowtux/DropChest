@@ -105,10 +105,7 @@ public class DropChestPlayerListener extends PlayerListener {
 								ret+=ChatColor.AQUA+"Filters:\n";
 								ret+=filterString;
 							}
-							String strings[] = ret.split("\n");
-							for (String val:strings){
-								event.getPlayer().sendMessage(val);
-							}
+							dplayer.sendMessage(ret);
 						} else {
 							event.getPlayer().sendMessage("This is not a DropChest!");
 						}

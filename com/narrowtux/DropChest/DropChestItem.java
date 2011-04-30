@@ -116,7 +116,7 @@ public class DropChestItem {
 	}
 
 	public void warnNearlyFull(){
-		if(!warnedNearlyFull){
+		if(!warnedNearlyFull&&plugin.config.getWarnFillStatus()!=-1){
 			String warnString = plugin.config.getWarnString();
 			warnString = warnString.replaceAll("\\$name", getName());
 			warnString = warnString.replaceAll("\\$fill", String.valueOf((int)(getPercentFull()*100.0)));

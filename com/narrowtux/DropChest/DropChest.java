@@ -581,7 +581,7 @@ public class DropChest extends JavaPlugin {
 			if(syntaxerror){
 				if(onPermissionSend(sender, "dropchest", ChatColor.BLUE.toString()+"DropChest Commands:")){
 					sender.sendMessage(ChatColor.BLUE.toString()+"{this} is a required variable argument");
-					sender.sendMessage(ChatColor.BLUE.toString()+"[this] can be omitted");
+					sender.sendMessage(ChatColor.BLUE.toString()+"[this=x] can be omitted, x is standard");
 					sender.sendMessage(ChatColor.BLUE.toString()+"{chest} can be either a name or an id");
 					onPermissionSend(sender, "dropchest.create", " /dropchest add [radius=2]");
 					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chest}");

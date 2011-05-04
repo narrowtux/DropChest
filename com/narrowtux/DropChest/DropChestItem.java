@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -536,7 +537,47 @@ public class DropChestItem {
 			}
 		}
 	}
-
+	
+	public String info(){
+		String ret = ChatColor.WHITE.toString();
+		String filterString = "";
+		ret+="ID: "+ChatColor.YELLOW+getId()+ChatColor.WHITE+
+		" Name: "+ChatColor.YELLOW+getName()+
+		ChatColor.WHITE+" Radius: "+ChatColor.YELLOW+getRadius()+
+		ChatColor.WHITE+" Owner: "+ChatColor.YELLOW+getOwner()+"\n";
+		for(FilterType type:FilterType.values()){
+			List<Material> filter = getFilter(type);
+			if(filter.size()!=0)
+			{
+				filterString+=ChatColor.AQUA+type.toString()+":\n";
+				boolean useId = false;
+				if(filter.size()<5){
+					useId = false;
+				} else {
+					useId = true;
+				}
+				for(int i = 0; i<filter.size();i++){
+					Material m = filter.get(i);
+					filterString+=ChatColor.YELLOW.toString();
+					if(useId){
+						filterString+=m.getId();
+					} else {
+						filterString+=m.toString();
+					}
+					if(i+1!=filter.size()){
+						filterString+=ChatColor.WHITE+", ";
+					} else {
+						filterString+=ChatColor.WHITE+"\n";
+					}
+				}
+			}
+		}
+		if(!filterString.equals("")){
+			ret+=ChatColor.AQUA+"Filters:\n";
+			ret+=filterString;
+		}
+		return ret;
+	}
 
 	public boolean isChest(){
 		return block.getType().equals(Material.CHEST);
@@ -614,4 +655,5 @@ public class DropChestItem {
 	}
 
 
+	
 }

@@ -431,6 +431,18 @@ public class DropChest extends JavaPlugin {
 									} else {
 										sender.sendMessage("That's not your chest.");
 									}
+								} else if(itemstring.equalsIgnoreCase("all")){
+									if(chest!=null&&ownsChest(chest, sender)){
+										List<Material> filter = chest.getFilter(type);
+										for (Material m:Material.values()){
+											if(!m.equals(Material.AIR)){
+												if(!filter.contains(m)){
+													filter.add(m);
+												}
+											}
+										}
+										sender.sendMessage(ChatColor.GREEN+"All items set.");
+									}
 								} else {
 									if(chest!=null){
 										if(ownsChest(chest, sender)){
@@ -572,7 +584,16 @@ public class DropChest extends JavaPlugin {
 					} else {
 						syntaxerror = true;
 					}
-				}else {
+				} else if(args[0].equalsIgnoreCase("info")){
+					if(args.length==2){
+						DropChestItem chest = getChestByIdOrName(args[1]);
+						if(chest!=null){
+							sender.sendMessage(chest.info());
+						} else {
+							sender.sendMessage("Chest not found.");
+						}
+					}
+				} else {
 					log.log(Level.INFO, "Command not found.");
 					syntaxerror = true;
 				}
@@ -589,7 +610,7 @@ public class DropChest extends JavaPlugin {
 					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chest} {radius}");
 					onPermissionSend(sender, "dropchest.which", " /dropchest which");
 					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chest}");
-					onPermissionSend(sender, "dropchest.filter", " /dropchest filter {suck|push|pull} [{chest} {itemid|itemtype|clear}]");
+					onPermissionSend(sender, "dropchest.filter", " /dropchest filter {suck|push|pull} [{chest} {itemid|itemtype|clear|all}]");
 					onPermissionSend(sender, "dropchest", " /dropchest setname {chest} {name}");
 					int max = getMaximumRadius(player);
 					String maxs = String.valueOf(max);

@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import org.bukkit.entity.Player;
 
 public class DropChestPlayer {
+	@SuppressWarnings("unused")
 	private Player player = null;
 	private String playerName = "";
 	private FilterType editingFilterType = FilterType.SUCK;

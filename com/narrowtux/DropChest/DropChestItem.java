@@ -18,6 +18,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.narrowtux.DropChest.API.DropChestSuckEvent;
+
 public class DropChestItem {
 	private ContainerBlock containerBlock;
 	private Block block;

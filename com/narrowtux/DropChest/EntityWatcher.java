@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import com.narrowtux.DropChest.DropChest;
+import com.narrowtux.DropChest.API.DropChestSuckEvent;
 
 import org.bukkit.entity.Item;
 
@@ -56,24 +57,28 @@ public class EntityWatcher implements Runnable {
 							if(distance.lengthSquared() < 1.0*dci.getRadius()*dci.getRadius() + 1)
 							{
 								ItemStack stack = item.getItemStack();
-								HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
-								boolean allin = false;
-								if(ret.size()==0){
-									item.remove();
-									allin = true;
-								}
-								else {
-									for(ItemStack s : ret.values()){
-										stack.setAmount(s.getAmount());
+								DropChestSuckEvent event = new DropChestSuckEvent(dci, item);
+								plugin.getServer().getPluginManager().callEvent(event);
+								if(!event.isCancelled()){
+									HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
+									boolean allin = false;
+									if(ret.size()==0){
+										item.remove();
+										allin = true;
 									}
-									item.setItemStack(stack);
+									else {
+										for(ItemStack s : ret.values()){
+											stack.setAmount(s.getAmount());
+										}
+										item.setItemStack(stack);
+									}
+									if(dci.getPercentFull()>=plugin.config.getWarnFillStatus()/100.0)
+										dci.warnNearlyFull();
+									if(allin){
+										break;
+									}
+									continue;
 								}
-								if(dci.getPercentFull()>=plugin.config.getWarnFillStatus()/100.0)
-									dci.warnNearlyFull();
-								if(allin){
-									break;
-								}
-								continue;
 							}
 						}
 					}

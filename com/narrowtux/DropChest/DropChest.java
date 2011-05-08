@@ -607,6 +607,7 @@ public class DropChest extends JavaPlugin {
 					onPermissionSend(sender, "dropchest.create", " /dropchest add [radius=2]");
 					onPermissionSend(sender, "dropchest.remove", " /dropchest remove {chest}");
 					onPermissionSend(sender, "dropchest.list", " /dropchest list [page=1]");
+					onPermissionSend(sender, "dropchest.list", "/dropchest info {chestname|chestid}");
 					onPermissionSend(sender, "dropchest.radius.set", " /dropchest setradius {chest} {radius}");
 					onPermissionSend(sender, "dropchest.which", " /dropchest which");
 					onPermissionSend(sender, "dropchest.teleport", " /dropchest tp {chest}");

@@ -78,6 +78,14 @@ public class DropChestPlayerListener extends PlayerListener {
 					event.setCancelled(true);
 				}
 			}
+			if(dplayer!=null&&dplayer.getChestRequestType().equals(ChestRequestType.CHESTINFO)){
+				if(DropChestItem.acceptsBlockType(b.getType())){
+					ContainerBlock cb = (ContainerBlock)b.getState();
+					dplayer.sendMessage(DropChest.chestInformation(cb.getInventory(), "of clicked chest"));
+					dplayer.setChestRequestType(ChestRequestType.NONE);
+					event.setCancelled(true);
+				}
+			}
 		} else if(event.getAction()==Action.LEFT_CLICK_BLOCK){
 			Player player = event.getPlayer();
 			DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(player.getName());

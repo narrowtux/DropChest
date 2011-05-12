@@ -652,13 +652,17 @@ public class DropChest extends JavaPlugin {
 			}
 		}
 		if(cmd.getName().equals("chestinfo")){
+			if(!hasPermission(player, "dropchest.moderator")){
+				sender.sendMessage("You may not use this command");
+				return false;
+			}
 			if(args.length==1){
 				DropChestItem dci = getChestByIdOrName(args[0]);
 				if(dci==null){
 					sender.sendMessage("This chest doesn't exist.");
 					return false;
 				}
-				sender.sendMessage(chestInformation(dci.getChest().getInventory()));
+				sender.sendMessage(chestInformation(dci.getChest().getInventory(),"of "+dci.getName()));
 				return true;
 			} else {
 				if(sender instanceof Player){
@@ -810,7 +814,7 @@ public class DropChest extends JavaPlugin {
 		return false;
 	}
 	
-	public String chestInformation(Inventory inv){
+	public static String chestInformation(Inventory inv, String identifier){
 		HashMap<Material, Integer> map = new HashMap<Material, Integer>();
 		for(int i = 0; i<inv.getSize(); i++){
 			ItemStack stack = inv.getItem(i);
@@ -824,10 +828,15 @@ public class DropChest extends JavaPlugin {
 				map.put(mat, count);
 			}
 		}
-		String ret = "";
+		String ret = ChatColor.GREEN+"Statistics for inventory "+identifier+":\n";
+		int i = 0;
 		for(Material mat:map.keySet()){
 			int count = map.get(mat);
-			ret+=ChatColor.YELLOW+mat.toString()+ChatColor.WHITE+": "+count+"\n";
+			ret+=ChatColor.YELLOW+mat.toString()+ChatColor.WHITE+": "+count;
+			if(i!=map.size()-1){
+				ret+="\n";
+			}
+			i++;
 		}
 		return ret;
 	}

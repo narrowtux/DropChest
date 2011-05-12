@@ -207,20 +207,30 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public HashMap<Integer, ItemStack> removeItem(ItemStack... arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		HashMap<Integer, ItemStack> ret = new HashMap<Integer, ItemStack>();
+		int i = 0;
+		for(ItemStack item: arg0){
+			ret.put(i++, item);
+		}
+		for(Inventory inv:inventories){
+			if(ret.size()==0){
+				return ret;
+			} else {
+				ItemStack items[] = (ItemStack[])ret.values().toArray();
+				ret = inv.removeItem(items);
+			}
+		}
+		return ret;
 	}
 
 	@Override
 	public void setContents(ItemStack[] arg0) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void setItem(int arg0, ItemStack arg1) {
 		mapToLocalInventory(arg0).setItem(mapToLocalSlot(arg0), arg1);
-
 	}
 	
 	private Inventory mapToLocalInventory(int slot){

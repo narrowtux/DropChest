@@ -8,11 +8,19 @@ public class DropChestListener extends CustomEventListener {
 		
 	}
 	
+	public void onDropChestFill(DropChestFillEvent event){
+		
+	}
+	
 	@Override
 	public void onCustomEvent(Event e){
 		if(e.getEventName().equals("DropChestSuckEvent")){
 			DropChestSuckEvent event = (DropChestSuckEvent)e;
 			onDropChestSuck(event);
+		}
+		if(e.getEventName().equals("DropChestFillEvent")){
+			DropChestFillEvent event = (DropChestFillEvent)e;
+			onDropChestFill(event);
 		}
 	}
 }

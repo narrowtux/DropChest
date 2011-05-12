@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 
+import org.bukkit.Material;
+
 public class FlatFileReader {
 	private File file;
 	private boolean caseSensitive;
@@ -85,6 +87,23 @@ public class FlatFileReader {
 		} else {
 			return fallback;
 		}
+	}
+	
+	public Material getMaterial(String key, Material fallback){
+		if(keySet.containsKey(key)){
+			Material ret;
+			try{
+				ret = Material.getMaterial(keySet.get(key));
+			} catch(Exception e){
+				try{
+					ret = Material.getMaterial(Integer.valueOf(keySet.get(key)));
+				} catch(Exception ex){
+					return fallback;
+				}
+			}
+			return ret;
+		}
+		return fallback;
 	}
 	
 	private boolean load(){

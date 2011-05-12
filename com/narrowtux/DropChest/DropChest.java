@@ -12,6 +12,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
@@ -649,6 +651,26 @@ public class DropChest extends JavaPlugin {
 				return true;
 			}
 		}
+		if(cmd.getName().equals("chestinfo")){
+			if(args.length==1){
+				DropChestItem dci = getChestByIdOrName(args[0]);
+				if(dci==null){
+					sender.sendMessage("This chest doesn't exist.");
+					return false;
+				}
+				sender.sendMessage(chestInformation(dci.getChest().getInventory()));
+				return true;
+			} else {
+				if(sender instanceof Player){
+					DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(((Player)sender).getName());
+					dplayer.setChestRequestType(ChestRequestType.CHESTINFO);
+					dplayer.sendMessage("Rightclick on any chest to get information");
+				} else {
+					sender.sendMessage("You can't use interactive commands from the console");
+					return false;
+				}
+			}
+		}
 		return false;
 	}
 
@@ -786,6 +808,28 @@ public class DropChest extends JavaPlugin {
 			return true;
 		}
 		return false;
+	}
+	
+	public String chestInformation(Inventory inv){
+		HashMap<Material, Integer> map = new HashMap<Material, Integer>();
+		for(int i = 0; i<inv.getSize(); i++){
+			ItemStack stack = inv.getItem(i);
+			if(stack!=null&&stack.getTypeId()!=0){
+				Material mat = stack.getType();
+				Integer count = stack.getAmount();
+				if(map.containsKey(mat)){
+					int excnt = map.get(mat);
+					count+=excnt;
+				}
+				map.put(mat, count);
+			}
+		}
+		String ret = "";
+		for(Material mat:map.keySet()){
+			int count = map.get(mat);
+			ret+=ChatColor.YELLOW+mat.toString()+ChatColor.WHITE+": "+count+"\n";
+		}
+		return ret;
 	}
 }
 

@@ -11,3 +11,6 @@ commands:
  dcitem:
   description: Gives you the name or the id of the passed item.
   usage: /dcitem [NAME|id]
+ chestinfo:
+  description: Gives you information about a chests contents. Omit the argument and rightclick on a non-dropchest
+  usage: /chestinfo {name|id}

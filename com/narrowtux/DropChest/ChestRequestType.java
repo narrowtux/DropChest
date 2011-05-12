@@ -5,4 +5,5 @@ public enum ChestRequestType {
 	CREATE,
 	DELETE,
 	WHICH,
+	CHESTINFO,
 }

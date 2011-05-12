@@ -17,7 +17,9 @@ import org.bukkit.craftbukkit.entity.CraftStorageMinecart;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 
+import com.narrowtux.DropChest.API.DropChestFillEvent;
 import com.narrowtux.DropChest.API.DropChestSuckEvent;
 
 public class DropChestItem {
@@ -140,15 +142,20 @@ public class DropChestItem {
 
 	public HashMap<Integer, ItemStack> addItem(ItemStack item, FilterType filterType)
 	{
+		DropChestFillEvent fillEvent = new DropChestFillEvent(this);
+		PluginManager pm = plugin.getServer().getPluginManager();
 		getChest();
 		if(filter.get(filterType).size()==0&&filterType==FilterType.SUCK){
-			return containerBlock.getInventory().addItem(item);
+			HashMap<Integer, ItemStack> ret = containerBlock.getInventory().addItem(item);
+			pm.callEvent(fillEvent);
+			return ret;
 		}
 		else
 		{
 			for(Material m : filter.get(filterType))
 			{
 				if(m.getId()==item.getTypeId()){
+					pm.callEvent(fillEvent);
 					return containerBlock.getInventory().addItem(item);
 				}
 			}

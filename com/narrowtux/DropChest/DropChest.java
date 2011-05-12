@@ -697,7 +697,9 @@ public class DropChest extends JavaPlugin {
 			}
 			int max = Permissions.getUserPermissionInteger(player.getWorld().getName(), player.getName(), "dropchestmaxradius");
 			if(max==-1){
-				max = config.getFallbackRadius();
+				max = Permissions.getGroupPermissionInteger(player.getWorld().getName(), Permissions.getGroup(player.getWorld().getName(), player.getName()), "dropchestmaxradius");
+				if(max==-1)
+					max = config.getFallbackRadius();
 			}
 			return max;
 		}

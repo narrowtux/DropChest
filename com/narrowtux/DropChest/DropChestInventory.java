@@ -225,7 +225,9 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public void setContents(ItemStack[] arg0) {
-		// TODO Auto-generated method stub
+		for(int i = 0; i<arg0.length; i++){
+			setItem(i, arg0[i]);
+		}
 	}
 
 	@Override

@@ -242,8 +242,10 @@ public class DropChest extends JavaPlugin {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String args[])
 	{
 		Player player = null;
+		DropChestPlayer dplayer = null;
 		if(sender.getClass().getName().contains("Player")){
 			player = (Player)sender;
+			dplayer = DropChestPlayer.getPlayerByName(player.getName());
 		}
 		if(cmd.getName().equals("dropchest"))
 		{
@@ -403,10 +405,6 @@ public class DropChest extends JavaPlugin {
 						return false;
 					}
 					//dropchest filter {suck|push|pull|finish} [{chestid} {itemid|itemtype|clear}]
-					DropChestPlayer dplayer = null;
-					if(player!=null){
-						dplayer = DropChestPlayer.getPlayerByName(player.getName());
-					}
 					if(args.length>=2){
 						String typestring = args[1];
 						FilterType type = null;
@@ -662,11 +660,15 @@ public class DropChest extends JavaPlugin {
 					sender.sendMessage("This chest doesn't exist.");
 					return false;
 				}
-				sender.sendMessage(chestInformation(dci.getChest().getInventory(),"of "+dci.getName()));
+				String info = chestInformation(dci.getChest().getInventory(),"of "+dci.getName());
+				if(dplayer != null){
+					dplayer.sendMessage(info);
+				} else {
+					sender.sendMessage(info);
+				}
 				return true;
 			} else {
-				if(sender instanceof Player){
-					DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(((Player)sender).getName());
+				if(dplayer != null){
 					dplayer.setChestRequestType(ChestRequestType.CHESTINFO);
 					dplayer.sendMessage("Rightclick on any chest to get information");
 				} else {

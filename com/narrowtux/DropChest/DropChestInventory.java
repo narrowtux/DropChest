@@ -81,7 +81,7 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public void clear(int arg0) {
-		mapFromInventory(arg0).clear(mapFromSlot(arg0));
+		mapToLocalInventory(arg0).clear(mapToLocalSlot(arg0));
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public ItemStack getItem(int arg0) {
-		return mapFromInventory(arg0).getItem(mapFromSlot(arg0));
+		return mapToLocalInventory(arg0).getItem(mapToLocalSlot(arg0));
 	}
 
 	@Override
@@ -219,11 +219,12 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public void setItem(int arg0, ItemStack arg1) {
-		mapFromInventory(arg0).setItem(mapFromSlot(arg0), arg1);
+		mapToLocalInventory(arg0).setItem(mapToLocalSlot(arg0), arg1);
 
 	}
 	
-	private Inventory mapFromInventory(int slot){
+	private Inventory mapToLocalInventory(int slot){
+		//Maps a given global slot id to the corresponding local inventory
 		for(Inventory inv: inventories)
 		{
 			slot-=inv.getSize();
@@ -234,7 +235,8 @@ public class DropChestInventory implements Inventory {
 		return null;
 	}
 	
-	private int mapFromSlot(int slot){
+	private int mapToLocalSlot(int slot){
+		//Maps a given global slot id to the corresponding local slot of the inventory
 		for(Inventory inv: inventories)
 		{
 			slot-=inv.getSize();
@@ -246,5 +248,16 @@ public class DropChestInventory implements Inventory {
 			}
 		}
 		return -1;
+	}
+	
+	private int mapToGlobalSlot(int slot, Inventory localinv){
+		for(Inventory inv:inventories){
+			if(inv==localinv){
+				break;
+			} else {
+				slot+=inv.getSize();
+			}
+		}
+		return slot;
 	}
 }

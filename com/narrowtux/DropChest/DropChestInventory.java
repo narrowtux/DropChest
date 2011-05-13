@@ -237,6 +237,7 @@ public class DropChestInventory implements Inventory {
 	}
 	
 	private Inventory mapToLocalInventory(int slot){
+		//confirmed to work.
 		//Maps a given global slot id to the corresponding local inventory
 		for(Inventory inv: inventories)
 		{
@@ -249,6 +250,7 @@ public class DropChestInventory implements Inventory {
 	}
 	
 	private int mapToLocalSlot(int slot){
+		//confirmed to work.
 		//Maps a given global slot id to the corresponding local slot of the inventory
 		for(Inventory inv: inventories)
 		{

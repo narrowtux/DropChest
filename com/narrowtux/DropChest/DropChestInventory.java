@@ -25,7 +25,8 @@ public class DropChestInventory implements Inventory {
 			if(ret.size()==0){
 				return ret;
 			} else {
-				ItemStack items[] = (ItemStack[])ret.values().toArray();
+				ItemStack demo[] = {}; 
+				ItemStack items[] = (ItemStack[])ret.values().toArray(demo);
 				ret = inv.addItem(items);
 			}
 		}
@@ -155,8 +156,7 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public int firstEmpty() {
-		// TODO Auto-generated method stub
-		return 0;
+		return first(0);
 	}
 
 	@Override

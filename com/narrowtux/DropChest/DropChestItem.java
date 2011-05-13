@@ -82,6 +82,21 @@ public class DropChestItem {
 			return null;
 		}
 	}
+	
+	public Inventory getInventory(){
+		//First, check if this is a double chest.
+		BlockFace faces[] = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
+		for(BlockFace face:faces){
+			Block other = getBlock().getFace(face);
+			if(other.getType().equals(Material.CHEST)){
+				if(other.getState() instanceof ContainerBlock){
+					Inventory inventories[] = {getChest().getInventory(), ((ContainerBlock)other.getState()).getInventory()};
+					return new DropChestInventory(inventories);
+				}
+			}
+		}
+		return getChest().getInventory();
+	}
 
 	public void setChest(Chest chest) {
 		this.containerBlock = chest;
@@ -98,7 +113,7 @@ public class DropChestItem {
 	}
 
 	public double getPercentFull(){
-		Inventory inv = containerBlock.getInventory();
+		Inventory inv = getInventory();
 		int stacks = inv.getSize();
 		int maxStackSize = 0;
 		int totalItems = 0;
@@ -146,7 +161,7 @@ public class DropChestItem {
 		PluginManager pm = plugin.getServer().getPluginManager();
 		getChest();
 		if(filter.get(filterType).size()==0&&filterType==FilterType.SUCK){
-			HashMap<Integer, ItemStack> ret = containerBlock.getInventory().addItem(item);
+			HashMap<Integer, ItemStack> ret = getInventory().addItem(item);
 			pm.callEvent(fillEvent);
 			return ret;
 		}
@@ -156,7 +171,7 @@ public class DropChestItem {
 			{
 				if(m.getId()==item.getTypeId()){
 					pm.callEvent(fillEvent);
-					return containerBlock.getInventory().addItem(item);
+					return getInventory().addItem(item);
 				}
 			}
 			HashMap<Integer, ItemStack> ret = new HashMap<Integer, ItemStack>();

@@ -660,7 +660,7 @@ public class DropChest extends JavaPlugin {
 					sender.sendMessage("This chest doesn't exist.");
 					return false;
 				}
-				String info = chestInformation(dci.getChest().getInventory(),"of "+dci.getName());
+				String info = chestInformation(dci.getInventory(),"of "+dci.getName());
 				if(dplayer != null){
 					dplayer.sendMessage(info);
 				} else {

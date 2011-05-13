@@ -16,6 +16,7 @@ public class DropChestInventory implements Inventory {
 	
 	@Override
 	public HashMap<Integer, ItemStack> addItem(ItemStack... arg0) {
+		//Confirmed to work.
 		HashMap<Integer, ItemStack> ret = new HashMap<Integer, ItemStack>();
 		int i = 0;
 		for(ItemStack item: arg0){
@@ -74,10 +75,10 @@ public class DropChestInventory implements Inventory {
 
 	@Override
 	public void clear() {
+		//Should work.
 		for(Inventory inv:inventories){
 			inv.clear();
 		}
-
 	}
 
 	@Override
@@ -240,7 +241,7 @@ public class DropChestInventory implements Inventory {
 		for(Inventory inv: inventories)
 		{
 			slot-=inv.getSize();
-			if(slot<=0){
+			if(slot<0){
 				return inv;
 			}
 		}

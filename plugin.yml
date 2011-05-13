@@ -1,6 +1,6 @@
 name: DropChest
 main: com.narrowtux.DropChest.DropChest
-version: 0.7.6
+version: 0.7.7
 author: narrowtux
 description: DropChest sucks dropped loot into Chests. It's very useful if you do automatic farming or have mobs traps which gather the loot.
 commands:

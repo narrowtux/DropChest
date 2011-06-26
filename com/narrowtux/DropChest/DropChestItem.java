@@ -544,19 +544,21 @@ public class DropChestItem {
 							ItemStack ret=hash.get(0);
 							items.setAmount(items.getAmount()-ret.getAmount());
 						}
-						chinv.remove(items);
+						chinv.clear(i);
 					}
 				}
 			}
 			for(int i = 0; i<miinv.getSize();i++){
 				ItemStack items = miinv.getItem(i);
 				if(items.getAmount()!=0){
-					HashMap<Integer,ItemStack> hash = addItem(items, FilterType.PULL);
-					if(hash.size()!=0){
-						ItemStack ret=hash.get(0);
-						items.setAmount(items.getAmount()-ret.getAmount());
+					if(getFilter(FilterType.PULL).contains(items.getType())){
+						HashMap<Integer,ItemStack> hash = addItem(items, FilterType.PULL);
+						if(hash.size()!=0){
+							ItemStack ret=hash.get(0);
+							items.setAmount(items.getAmount()-ret.getAmount());
+						}
+					miinv.clear(i);
 					}
-					miinv.remove(items);
 				}
 			}
 		}

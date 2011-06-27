@@ -69,8 +69,7 @@ public class DropChest extends JavaPlugin {
 		
 		//Register the Entity Watcher
 		entityWatcher = new EntityWatcher(this);
-		watcherid = getServer().getScheduler().scheduleSyncRepeatingTask(this, entityWatcher, 20, 20);
-		
+		watcherid = getServer().getScheduler().scheduleSyncRepeatingTask(this, entityWatcher, 10,10);
 		// Register our events
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);

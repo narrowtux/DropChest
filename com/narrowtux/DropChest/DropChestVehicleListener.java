@@ -57,21 +57,26 @@ public class DropChestVehicleListener extends VehicleListener {
 	
 	public boolean minecartNearBlock(Block b, Minecart v)
 	{
-		if(v.getLocation().getBlockY()!=b.getY()){
+		if(Math.abs(v.getLocation().getBlockY()-b.getY())>1)
+		{
 			return false;
 		}
+		
 		List<Block> facings = new ArrayList<Block>();
 		facings.add(b.getFace(BlockFace.NORTH));
 		facings.add(b.getFace(BlockFace.EAST));
 		facings.add(b.getFace(BlockFace.SOUTH));
 		facings.add(b.getFace(BlockFace.WEST));
+		facings.add(b.getFace(BlockFace.UP));
+		facings.add(b.getFace(BlockFace.DOWN));
 		Location loc = v.getLocation();
 		int x = loc.getBlockX();
 		int z = loc.getBlockZ();
+		int y = loc.getBlockY();
 
 		for(Block face:facings)
 		{
-			if(x==face.getX()&&z==face.getZ()){
+			if(x==face.getX()&&z==face.getZ()&&y==face.getY()){
 				return true;
 			}
 		}

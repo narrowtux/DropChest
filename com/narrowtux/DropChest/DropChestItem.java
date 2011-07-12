@@ -15,6 +15,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.craftbukkit.entity.CraftStorageMinecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.StorageMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
@@ -451,7 +452,7 @@ public class DropChestItem {
 	}
 
 	@SuppressWarnings("unused")
-	public void minecartAction(CraftStorageMinecart storage){
+	public void minecartAction(StorageMinecart storage){
 		ContainerBlock chest = getChest();
 		Inventory chinv = chest.getInventory();
 		Inventory miinv = storage.getInventory();
@@ -542,22 +543,26 @@ public class DropChestItem {
 						HashMap<Integer,ItemStack> hash = miinv.addItem(items);
 						if(hash.size()!=0){
 							ItemStack ret=hash.get(0);
-							items.setAmount(items.getAmount()-ret.getAmount());
+							items.setAmount(ret.getAmount());
+							chinv.setItem(i, items);
+						}else {
+							chinv.clear(i);
 						}
-						chinv.clear(i);
 					}
 				}
 			}
 			for(int i = 0; i<miinv.getSize();i++){
-				ItemStack items = miinv.getItem(i);
+				ItemStack items = miinv.getItem(i).clone();
 				if(items.getAmount()!=0){
 					if(getFilter(FilterType.PULL).contains(items.getType())){
 						HashMap<Integer,ItemStack> hash = addItem(items, FilterType.PULL);
 						if(hash.size()!=0){
 							ItemStack ret=hash.get(0);
-							items.setAmount(items.getAmount()-ret.getAmount());
+							items.setAmount(ret.getAmount());
+							miinv.setItem(i, items);
+						} else {
+							miinv.clear(i);
 						}
-					miinv.clear(i);
 					}
 				}
 			}

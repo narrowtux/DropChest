@@ -108,8 +108,13 @@ public class DropChestItem {
 	}
 
 	public void setRadius(int radius) {
-		if(radius<2)
+		if(radius<0)
+		{
+			sender.sendMessage(ChatColor.RED.toString()+"Chest radius was negative!, radius changed to 2");
 			radius = 2;
+		}
+		else if(radius==0)
+			sender.sendMessage(ChatColor.RED.toString()+"Chest radius is 0, the chest will not suck");
 		this.radius = radius;
 	}
 

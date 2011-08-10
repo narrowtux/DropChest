@@ -234,7 +234,7 @@ public class DropChestItem {
 			ItemStack item = containerBlock.getInventory().getItem(i);
 			if(item.getAmount()!=0){
 				world.dropItem(loc, item);
-				containerBlock.getInventory().remove(item);
+							 containerBlock.getInventory().clear(i);
 			}
 		}
 		Date date = new Date();

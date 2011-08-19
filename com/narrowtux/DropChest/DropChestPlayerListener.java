@@ -33,7 +33,7 @@ public class DropChestPlayerListener extends PlayerListener {
 			Block b = event.getClickedBlock();
 			if(DropChestItem.acceptsBlockType(b.getType())){
 				DropChestItem chestdci = plugin.getChestByBlock(b);
-
+				
 				if(chestdci!=null&&chestdci.isProtect()&&(!chestdci.getOwner().equals(dplayer.getPlayer().getName()))){
 					event.setCancelled(true);
 					dplayer.getPlayer().sendMessage("That's not your chest");

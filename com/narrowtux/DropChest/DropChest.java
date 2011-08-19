@@ -33,8 +33,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import java.io.*;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import com.nijiko.data.YamlCreator;
 import com.nijiko.permissions.PermissionHandler;
 import org.bukkit.plugin.Plugin;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * DropChest for Bukkit
@@ -176,7 +178,7 @@ public class DropChest extends JavaPlugin {
 			log.log(Level.INFO, "Creating DropChest directory.");
 			dir.mkdir();
 		}
-		File file = new File(dir.getAbsolutePath()+"/DropChest.txt");
+		File file = new File(dir.getAbsolutePath()+"/dropchests.yml");
 		if(!file.exists()){
 			log.log(Level.INFO, "no file. Trying to create it.");
 			try {
@@ -187,24 +189,17 @@ public class DropChest extends JavaPlugin {
 			}
 		}
 		try {
-			FileOutputStream output = new FileOutputStream(file.getAbsoluteFile());
-			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
-			w.write("version 0.8\n");
-			w.write("#LEGEND\n#x, y, z, radius, World-Name, nothing, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
-			w.write("#Filtered items are separated by ','. Name the items like the names in org.bukkit.Material, e.g. COBBLESTONE\n");
-			for(DropChestItem dci : chests)
-			{
-				String line = dci.save();
-				w.write(line);
+			Map<String, Object> data = new HashMap<String, Object>();
+			for(DropChestItem dci:getChests()){
+				Map<String, Object> chest = new HashMap<String, Object>();
+				dci.save(chest);
+				data.put(""+dci.getId(), chest);
 			}
-			w.flush();
-			output.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			Yaml yaml = new Yaml();
+		    FileWriter writer = new FileWriter(file);
+		    yaml.dump(data, writer);
 		} catch (Exception e) {
-			System.out.println("Unexpected error.");
+			e.printStackTrace();
 		}
 	}
 

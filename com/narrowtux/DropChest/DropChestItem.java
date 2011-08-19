@@ -1,8 +1,10 @@
 package com.narrowtux.DropChest;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 
 import org.bukkit.Bukkit;
@@ -20,11 +22,14 @@ import org.bukkit.entity.StorageMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 import com.narrowtux.DropChest.API.DropChestFillEvent;
 import com.narrowtux.DropChest.API.DropChestSuckEvent;
 
-public class DropChestItem {
+public class DropChestItem implements Serializable{
+	private static final long serialVersionUID = 2940482362395614394L;
+	
 	private ContainerBlock containerBlock;
 	private Block block;
 	
@@ -90,7 +95,7 @@ public class DropChestItem {
 		//First, check if this is a double chest.
 		BlockFace faces[] = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
 		for(BlockFace face:faces){
-			Block other = getBlock().getFace(face);
+			Block other = getBlock().getRelative(face);
 			if(other.getType().equals(Material.CHEST)){
 				if(other.getState() instanceof ContainerBlock){
 					Inventory inventories[] = {getChest().getInventory(), ((ContainerBlock)other.getState()).getInventory()};
@@ -216,7 +221,7 @@ public class DropChestItem {
 	}
 
 	public void setRedstone(boolean value){
-		Block below = block.getFace(BlockFace.DOWN);
+		Block below = block.getRelative(BlockFace.DOWN);
 		if(below.getTypeId() == Material.LEVER.getId()){
 			byte data = below.getData();
 			if(value){
@@ -713,6 +718,35 @@ public class DropChestItem {
 		return DropChestPlayer.getPlayerByName(getOwner());
 	}
 
+	public void save(Map<String, Object> chest) {
+		chest.put("id", getId());
+		chest.put("name", getName());
+		chest.put("owner", getOwner());
+		chest.put("delay", getDelay());
+		chest.put("protect", isProtect());
+		chest.put("radius", getRadius());
+		chest.put("location", locationToString(loc));
+		Map<String, Object> filters = new HashMap<String, Object>();
+		for(FilterType type:FilterType.values()){
+			String filter[] = {};
+			for(Material mat:getFilter(type)){
+				filter[filter.length] = ""+mat.getId();
+			}
+			filters.put(type.toString(), filter);
+		}
+		chest.put("filter", filters);
+	}
+
+	private String [] locationToString(Location loc){
+		String [] ret = {
+				loc.getWorld().getName(), 
+				loc.getWorld().getEnvironment().toString(),
+				loc.getBlockX()+"",
+				loc.getBlockY()+"",
+				loc.getBlockZ()+""
+		};
+		return ret;
+	}
 
 	
 }

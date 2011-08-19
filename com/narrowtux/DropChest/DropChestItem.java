@@ -293,7 +293,7 @@ public class DropChestItem {
 			} else {
 				loadedProperly = false;
 			}
-		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")||fileVersion.equals("0.6")||fileVersion.equals("0.7")){
+		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")||fileVersion.equals("0.6")||fileVersion.equals("0.7")||fileVersion.equals("0.8")){
 			String splt[] = loadString.split(";");
 			if(splt.length>=1){
 				String data[] = splt[0].split(",");
@@ -367,12 +367,15 @@ public class DropChestItem {
 					} else {
 						id = currentId++;
 					}
-					if((fileVersion.equals("0.6")||fileVersion.equals("0.7"))&&data.length>=9){
+					if((fileVersion.equals("0.6")||fileVersion.equals("0.7"))||fileVersion.equals("0.8")&&data.length>=9){
 						setName(data[8]);
 					}
-					if(fileVersion.equals("0.7")&&data.length>=11){
+					if(fileVersion.equals("0.7")||fileVersion.equals("0.8")&&data.length>=11){
 						setOwner(data[9]);
 						setProtect(Boolean.valueOf(data[10]));
+					}
+					if(fileVersion.equals("0.8")){
+						setDelay(Integer.valueOf(data[11]));
 					}
 					if(world!=null){
 						Block b = world.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
@@ -418,6 +421,7 @@ public class DropChestItem {
 		line += "," + name;
 		line += "," + getOwner();
 		line += "," + String.valueOf(isProtect());
+		line += "," + getDelay();
 		//Filter saving
 		for(FilterType type : FilterType.values()){
 			line += ";";

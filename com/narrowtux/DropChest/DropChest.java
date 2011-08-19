@@ -189,7 +189,7 @@ public class DropChest extends JavaPlugin {
 		try {
 			FileOutputStream output = new FileOutputStream(file.getAbsoluteFile());
 			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(output));
-			w.write("version 0.7\n");
+			w.write("version 0.8\n");
 			w.write("#LEGEND\n#x, y, z, radius, World-Name, nothing, chestid;Suck-Filter;Pull-Filter;Push-Filter\n");
 			w.write("#Filtered items are separated by ','. Name the items like the names in org.bukkit.Material, e.g. COBBLESTONE\n");
 			for(DropChestItem dci : chests)
@@ -313,7 +313,12 @@ public class DropChest extends JavaPlugin {
 
 					//Page limit is 6 items per page
 					//calculation of needed pages
-					List<DropChestItem> chests = dplayer.getChests();
+					List<DropChestItem> chests;
+					if(dplayer!=null&&!(args.length>2&&args[2].equals("all"))){
+						chests = dplayer.getChests();
+					} else {
+						chests = this.chests;
+					}
 					int num = chests.size();
 					int needed = (int) Math.ceil((double)num/6.0);
 					int current = 1;

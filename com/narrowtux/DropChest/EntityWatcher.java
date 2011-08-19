@@ -17,8 +17,10 @@ import org.bukkit.entity.Item;
 
 public class EntityWatcher implements Runnable {
 	private DropChest plugin;
+	private HashMap<Integer, Long> timers;
 	public EntityWatcher(DropChest plugin) {
 		this.plugin = plugin;
+		this.timers = new HashMap<Integer,Long>();
 	}
 
 	@Override
@@ -56,29 +58,43 @@ public class EntityWatcher implements Runnable {
 							Vector distance = dci.getBlock().getLocation().toVector().add(new Vector(0.5,0,0.5)).subtract(item.getLocation().toVector());
 							if(distance.lengthSquared() < 1.0*dci.getRadius()*dci.getRadius() + 1)
 							{
-								ItemStack stack = item.getItemStack();
-								DropChestSuckEvent event = new DropChestSuckEvent(dci, item);
-								plugin.getServer().getPluginManager().callEvent(event);
-								if(!event.isCancelled()){
-									HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
-									boolean allin = false;
-									if(ret.size()==0){
-										item.remove();
-										allin = true;
-									}
-									else {
-										for(ItemStack s : ret.values()){
-											stack.setAmount(s.getAmount());
+								if(timers.containsKey(item.getEntityId()))
+								{
+									
+									if((date.getTime() - timers.get(item.getEntityId())) > dci.getDelay() )
+									{
+										timers.remove(item.getEntityId());
+										ItemStack stack = item.getItemStack();
+										DropChestSuckEvent event = new DropChestSuckEvent(dci, item);
+										plugin.getServer().getPluginManager().callEvent(event);
+										if(!event.isCancelled()){
+											HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
+											boolean allin = false;
+											if(ret.size()==0){
+												item.remove();
+												allin = true;
+											}
+											else {
+												for(ItemStack s : ret.values()){
+													stack.setAmount(s.getAmount());
+												}
+												item.setItemStack(stack);
+											}
+											if(dci.getPercentFull()>=plugin.config.getWarnFillStatus()/100.0)
+												dci.warnNearlyFull();
+											if(allin){
+												break;
+											}
+											continue;
 										}
-										item.setItemStack(stack);
 									}
-									if(dci.getPercentFull()>=plugin.config.getWarnFillStatus()/100.0)
-										dci.warnNearlyFull();
-									if(allin){
-										break;
-									}
-									continue;
+									
 								}
+								else
+								{
+									timers.put(item.getEntityId(), date.getTime());
+								}
+							
 							}
 						}
 					}

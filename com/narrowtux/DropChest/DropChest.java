@@ -380,7 +380,41 @@ public class DropChest extends JavaPlugin {
 					} else {
 						syntaxerror = true;
 					}
-				} else if(args[0].equalsIgnoreCase("which")){
+				} 
+				 else if(args[0].equalsIgnoreCase("setdelay")){
+					 sender.sendMessage("Got here.");
+						/*****************
+						 *   SETDELAY   *
+						 *****************/
+						if(!hasPermission(player, "dropchest.radius.set")){
+							player.sendMessage("You may not set the delay of a DropChest.");
+							return false;//Meh, it's such a similar action. I'm too lazy to add its own permission level.
+						}
+						if(args.length==3){
+							int delay = Integer.valueOf(args[2]);
+							delay = (delay > 0 ? delay : 0);//Derp derp, I'll set a negative delay! Nope.
+							DropChestItem dci = getChestByIdOrName(args[1]);
+							if(dci != null){
+								if(ownsChest(dci, sender)){
+									boolean force=true;
+									if(!hasPermission(player, "dropchest.radius.setBig")){
+										force =  false;
+									}
+									
+									dci.setDelay(delay);
+									sender.sendMessage("Delay of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getDelay()) + "milliseconds.");
+									setChests(chests);
+								} else {
+									sender.sendMessage("That's not your chest.");
+								}
+							} else {
+								syntaxerror = true;
+							}
+						} else {
+							syntaxerror = true;
+						}
+					}
+				else if(args[0].equalsIgnoreCase("which")){
 					/*****************
 					 *     WHICH     *
 					 *****************/
@@ -688,6 +722,7 @@ public class DropChest extends JavaPlugin {
 	}
 
 	public int getMaximumRadius(Player player) {
+		return 65536;/*
 		if(player == null){
 			return 65536;
 		} else {
@@ -701,7 +736,7 @@ public class DropChest extends JavaPlugin {
 					max = config.getFallbackRadius();
 			}
 			return max;
-		}
+		}*/
 	}
 
 	public boolean hasPermission(Player player, String node){

@@ -29,6 +29,7 @@ public class DropChestItem {
 	private Block block;
 	
 	private int radius;
+	private int delay = 0;
 	private String owner = "";
 	private boolean protect = false;
 	private String name = "";
@@ -117,6 +118,15 @@ public class DropChestItem {
 		else if(radius==0)
 			getOwnerPlayer().sendMessage(ChatColor.RED.toString()+"Chest radius is 0, the chest will not suck");
 		this.radius = radius;
+	}
+	
+	public void setDelay(int delay) {
+		this.delay = (delay >= 0 ? delay : 0);
+	}
+	
+	public int getDelay()
+	{
+		return delay;
 	}
 	
 	public Player getOwnerPlayer(){

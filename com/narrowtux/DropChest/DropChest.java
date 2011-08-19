@@ -399,7 +399,7 @@ public class DropChest extends JavaPlugin {
 						if(dci != null){
 							if(ownsChest(dci, sender)){
 								dci.setDelay(delay);
-								sender.sendMessage("Delay of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getDelay()) + "milliseconds.");
+								sender.sendMessage(ChatColor.GREEN+"Delay of Chest '"+dci.getName()+"' set to "+String.valueOf(dci.getDelay()) + " milliseconds.");
 								save();
 							} else {
 								sender.sendMessage("That's not your chest.");

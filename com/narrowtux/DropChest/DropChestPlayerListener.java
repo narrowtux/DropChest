@@ -32,12 +32,12 @@ public class DropChestPlayerListener extends PlayerListener {
 			DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(event.getPlayer().getName());
 			Block b = event.getClickedBlock();
 			if(DropChestItem.acceptsBlockType(b.getType())){
-				List<DropChestItem> chests = plugin.getChests();
 				DropChestItem chestdci = plugin.getChestByBlock(b);
 
 				if(chestdci!=null&&chestdci.isProtect()&&(!chestdci.getOwner().equals(dplayer.getPlayer().getName()))){
 					event.setCancelled(true);
 					dplayer.getPlayer().sendMessage("That's not your chest");
+					dplayer.setChestRequestType(ChestRequestType.NONE);
 					return;
 				}
 
@@ -52,16 +52,12 @@ public class DropChestPlayerListener extends PlayerListener {
 
 							DropChestItem dci = new DropChestItem(chest, radius, b, plugin);
 
-							chests.add(dci);
-
 							dci.setOwner(dplayer.getPlayer().getName());
 							dci.setProtect(false);
 
-							if(event.getPlayer()!=null)
-							{
-								event.getPlayer().sendMessage("Created DropChest. ID: #"+dci.getId());
-							}
-							plugin.save();
+							plugin.addChest(dci);
+							
+							event.getPlayer().sendMessage("Created DropChest. ID: #"+dci.getId());
 						} else {
 							dplayer.getPlayer().sendMessage(ChatColor.RED+"This DropChest already exists. ID: #"+chestdci.getId());
 						}
@@ -91,23 +87,8 @@ public class DropChestPlayerListener extends PlayerListener {
 			DropChestPlayer dplayer = DropChestPlayer.getPlayerByName(player.getName());
 			Block b = event.getClickedBlock();
 			if(DropChestItem.acceptsBlockType(b.getType())){
-				int radius = plugin.getRequestedRadius();
-				if(radius < 2)
-					radius = 2;
-				List<DropChestItem> chests = plugin.getChests();
-				boolean chestexists = false;
-				DropChestItem chestdci = null;
-				int i = 0;
-				for(DropChestItem dcic : chests){
-					Block block = b;
-					if(plugin.locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
-						chestexists = true;
-						chestdci = dcic;
-						break;
-					}
-					i++;
-				}
-				if(chestexists&&plugin.hasPermission(player, "dropchest.filter.set")&&dplayer.isEditingFilter()){
+				DropChestItem chestdci = plugin.getChestByBlock(b);
+				if(chestdci!=null&&plugin.hasPermission(player, "dropchest.filter.set")&&dplayer.isEditingFilter()){
 					Material m = player.getItemInHand().getType();
 					boolean found = false;
 					if(m.getId()==0&&plugin.hasPermission(player, "dropchest.filter.reset")){

@@ -19,16 +19,14 @@ public class DropChestBlockListener extends BlockListener {
 	public void onBlockBreak(BlockBreakEvent event){
 		Block block = event.getBlock();
 		if(DropChestItem.acceptsBlockType(block.getType())){
-			for(DropChestItem dci : plugin.getChests())
+			DropChestItem dci = plugin.getChestByBlock(block);
+			if(dci!=null)
 			{
-				if(plugin.locationsEqual(dci.getBlock().getLocation(),block.getLocation())){
-					if(dci.getOwner().equals(event.getPlayer().getName())){
-						plugin.getChests().remove(dci);
-						event.getPlayer().sendMessage(ChatColor.GREEN+"Removed Dropchest.");
-					} else {
-						event.getPlayer().sendMessage("That's not your chest.");
-					}
-					break;
+				if(dci.getOwner().equals(event.getPlayer().getName())){
+					plugin.removeChest(dci);
+					event.getPlayer().sendMessage(ChatColor.GREEN+"Removed Dropchest.");
+				} else {
+					event.getPlayer().sendMessage("That's not your chest.");
 				}
 			}
 		}

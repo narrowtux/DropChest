@@ -21,7 +21,10 @@ import org.bukkit.plugin.PluginManager;
 import com.narrowtux.DropChest.EntityWatcher;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +43,9 @@ import org.bukkit.plugin.Plugin;
  */
 public class DropChest extends JavaPlugin {
 	private List<DropChestItem> chests = new ArrayList<DropChestItem>();
+	private Map<Integer, DropChestItem> chestsHashInteger = new HashMap<Integer, DropChestItem>();
+	private Map<String, DropChestItem> chestsHashName = new HashMap<String, DropChestItem>();
+	private Map<Block, DropChestItem> chestsHashBlocks = new HashMap<Block, DropChestItem>();
 	private final DropChestPlayerListener playerListener = new DropChestPlayerListener(this);
 	private final DropChestBlockListener blockListener = new DropChestBlockListener(this);
 	private final DropChestWorldListener worldListener = new DropChestWorldListener();
@@ -52,7 +58,7 @@ public class DropChest extends JavaPlugin {
 	public Logger log;
 	private int watcherid;
 	public Configuration config;
-	
+
 	public DropChest() {
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		DropChestPlayer.plugin = this;
@@ -63,7 +69,7 @@ public class DropChest extends JavaPlugin {
 	public void onEnable() {
 		log = getServer().getLogger();
 		setupPermissions();
-		
+
 		//Register the Entity Watcher
 		entityWatcher = new EntityWatcher(this);
 		watcherid = getServer().getScheduler().scheduleSyncRepeatingTask(this, entityWatcher, 10,10);
@@ -74,29 +80,26 @@ public class DropChest extends JavaPlugin {
 		pm.registerEvent(Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
 		pm.registerEvent(Type.CHUNK_UNLOAD, worldListener, Priority.Normal, this);
 		pm.registerEvent(Type.REDSTONE_CHANGE, blockListener, Priority.Normal, this);
-		
+
 		//Read plugin file
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.log( Level.INFO, pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
 		version = pdfFile.getVersion();
-		
+
 		//Read configuration
 		File settings = new File(getDataFolder().getAbsolutePath()+"/dropchest.cfg");
 		config = new Configuration(settings);
-		
+
 		// Load our stuff
 		load();
 	}
 
-
-	public List<DropChestItem> getChests() {
-		return chests;
-	}
-
-	public void setChests(List<DropChestItem> chests) {
-		this.chests = chests;
+	public void addChest(DropChestItem item){
+		chestsHashInteger.put(item.getId(), item);
+		chestsHashName.put(item.getName(), item);
+		chestsHashBlocks.put(item.getBlock(), item);
+		chests.add(item);
 		save();
-
 	}
 
 	public void setupPermissions() {
@@ -146,7 +149,7 @@ public class DropChest extends JavaPlugin {
 					} else {
 						DropChestItem item = new DropChestItem(locline, version, this);
 						if(item.isLoadedProperly())
-							chests.add(item);
+							addChest(item);
 						else
 							log.log(Level.SEVERE, "Problem with line "+locline);
 					}
@@ -284,7 +287,7 @@ public class DropChest extends JavaPlugin {
 						DropChestItem dci = getChestByIdOrName(args[1]);
 						if(dci!=null){
 							if(ownsChest(dci, sender)){
-								chests.remove(dci);
+								removeChest(dci);
 								save();
 								sender.sendMessage(ChatColor.RED.toString()+"Removed Chest.");
 							} else {
@@ -305,10 +308,10 @@ public class DropChest extends JavaPlugin {
 						return false;
 					}
 					int i = 1;
-	
+
 					//Page limit is 6 items per page
 					//calculation of needed pages
-					int num = chests.size();
+					int num = getChestCount();
 					int needed = (int) Math.ceil((double)num/6.0);
 					int current = 1;
 					if(args.length==2){
@@ -321,10 +324,10 @@ public class DropChest extends JavaPlugin {
 					}
 					sender.sendMessage(ChatColor.BLUE.toString()+"Name | % full | filters | radius");
 					sender.sendMessage(ChatColor.BLUE.toString()+"------");
-					for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
-						sender.sendMessage(chests.get(i).listString());
+					for(i = (current-1)*6;i<Math.min(current*6, getChestCount()); i++){
+						//sender.sendMessage(chests.get(i).listString()); //TODO: Per player chest information
 					}
-	
+
 				} else if(args[0].equalsIgnoreCase("tp")){
 					/*****************
 					 *   TELEPORT    *
@@ -363,7 +366,7 @@ public class DropChest extends JavaPlugin {
 								}
 								dci.setRadius(radius);
 								sender.sendMessage("Radius of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getRadius()));
-								setChests(chests);
+								save();
 							} else {
 								sender.sendMessage("That's not your chest.");
 							}
@@ -373,54 +376,47 @@ public class DropChest extends JavaPlugin {
 					} else {
 						syntaxerror = true;
 					}
-				} 
-				 else if(args[0].equalsIgnoreCase("setdelay")){
-					 sender.sendMessage("Got here.");
-						/*****************
-						 *   SETDELAY   *
-						 *****************/
-						if(!hasPermission(player, "dropchest.radius.set")){
-							player.sendMessage("You may not set the delay of a DropChest.");
-							return false;//Meh, it's such a similar action. I'm too lazy to add its own permission level.
-						}
-						if(args.length==3){
-							int delay = Integer.valueOf(args[2]);
-							delay = (delay > 0 ? delay : 0);//Derp derp, I'll set a negative delay! Nope.
-							DropChestItem dci = getChestByIdOrName(args[1]);
-							if(dci != null){
-								if(ownsChest(dci, sender)){
-									boolean force=true;
-									if(!hasPermission(player, "dropchest.radius.setBig")){
-										force =  false;
-									}
-									
-									dci.setDelay(delay);
-									sender.sendMessage("Delay of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getDelay()) + "milliseconds.");
-									setChests(chests);
-								} else {
-									sender.sendMessage("That's not your chest.");
-								}
+				} else if(args[0].equalsIgnoreCase("setdelay")){
+					/*****************
+					 *   SETDELAY   *
+					 *****************/
+					if(!hasPermission(player, "dropchest.delay")){
+						player.sendMessage("You may not set the delay of a DropChest.");
+						return true;
+					}
+					if(args.length==3){
+						int delay = Integer.valueOf(args[2]);
+						delay = (delay > 0 ? delay : 0); //Derp derp, I'll set a negative delay! Nope.
+						DropChestItem dci = getChestByIdOrName(args[1]);
+						if(dci != null){
+							if(ownsChest(dci, sender)){
+								dci.setDelay(delay);
+								sender.sendMessage("Delay of Chest #"+dci.getId()+" set to "+String.valueOf(dci.getDelay()) + "milliseconds.");
+								save();
 							} else {
-								syntaxerror = true;
+								sender.sendMessage("That's not your chest.");
 							}
 						} else {
 							syntaxerror = true;
 						}
+					} else {
+						syntaxerror = true;
 					}
+				}
 				else if(args[0].equalsIgnoreCase("which")){
 					/*****************
 					 *     WHICH     *
 					 *****************/
 					if(!hasPermission(player, "dropchest.which")){
 						player.sendMessage("You may not use this command.");
-						return false;
+						return true;
 					}
 					if(player != null){
 						DropChestPlayer pl = DropChestPlayer.getPlayerByName(player.getName());
 						pl.setChestRequestType(ChestRequestType.WHICH);
 						sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on a chest to get its properties.");
 					}
-	
+
 				}else if(args[0].equalsIgnoreCase("filter")){
 					/*****************
 					 *     FILTER    *
@@ -511,8 +507,8 @@ public class DropChest extends JavaPlugin {
 										} else {
 											sender.sendMessage("That's not your chest.");
 										}
-										
-	
+
+
 									} else {
 										log.log(Level.INFO,"No such chest "+args[1]+".");
 										syntaxerror = true;
@@ -551,6 +547,7 @@ public class DropChest extends JavaPlugin {
 							if(ownsChest(item, sender)){
 								item.setName(name);
 								sender.sendMessage(ChatColor.GREEN+"Set name to "+item.getName());
+								updateName(item);
 								save();
 							} else {
 								sender.sendMessage("That's not your chest.");
@@ -706,6 +703,23 @@ public class DropChest extends JavaPlugin {
 		return false;
 	}
 
+	public int getChestCount() {
+		return chests.size();
+	}
+
+
+	public void removeChest(DropChestItem dci) {
+		chests.remove(dci);
+		chestsHashBlocks.remove(dci.getBlock());
+		chestsHashInteger.remove(dci.getId());
+		chestsHashName.remove(dci.getName());
+	}
+	
+	public void updateName(DropChestItem dci){
+		chestsHashName.put(dci.getName(), dci);
+	}
+
+
 	public int getMaximumRadius(Player player) {
 		if(player == null){
 			return 65536;
@@ -776,22 +790,11 @@ public class DropChest extends JavaPlugin {
 
 	public DropChestItem getChestByBlock(Block block)
 	{
-		for(DropChestItem dcic : chests){
-			if(locationsEqual(dcic.getBlock().getLocation(), block.getLocation())){
-				return dcic;
-			}
-		}
-		return null;
+		return chestsHashBlocks.get(block);
 	}
 
 	public DropChestItem getChestById(int id){
-		for(DropChestItem dci : chests)
-		{
-			if(dci.getId()==id){
-				return dci;
-			}
-		}
-		return null;
+		return chestsHashInteger.get(id);
 	}
 
 	public DropChestItem getChestByIdOrName(String arg){
@@ -807,16 +810,11 @@ public class DropChest extends JavaPlugin {
 	}
 
 	public DropChestItem getChestByName(String name){
-		DropChestItem dci = null;
-		for(DropChestItem d:chests){
-			if(d.getName().equalsIgnoreCase(name)){
-				dci = d;
-				break;
-			}
-		}
-		return dci;
+		if(name.equals(""))
+			return null;
+		return chestsHashName.get(name);
 	}
-	
+
 	public boolean ownsChest(DropChestItem dci, CommandSender sender){
 		if(sender.isOp()){
 			return true;
@@ -835,7 +833,7 @@ public class DropChest extends JavaPlugin {
 		}
 		return false;
 	}
-	
+
 	public static String chestInformation(Inventory inv, String identifier){
 		HashMap<Material, Integer> map = new HashMap<Material, Integer>();
 		for(int i = 0; i<inv.getSize(); i++){
@@ -861,6 +859,15 @@ public class DropChest extends JavaPlugin {
 			i++;
 		}
 		return ret;
+	}
+
+
+	public List<DropChestItem> getChests() {
+		return Collections.unmodifiableList(chests);
+	}
+	
+	public boolean chestExists(Block b){
+		return chestsHashBlocks.containsKey(b);
 	}
 }
 

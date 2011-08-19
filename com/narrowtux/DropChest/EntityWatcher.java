@@ -32,7 +32,7 @@ public class EntityWatcher implements Runnable {
 					if(e instanceof Item)
 					{
 						Item item = (Item)e;
-						for(int i = 0; i<plugin.getChests().size();i++){
+						for(int i = 0; i<plugin.getChestCount();i++){
 							DropChestItem dci = plugin.getChests().get(i);
 							Date date = new Date();
 							if(date.getTime()/1000-plugin.config.getIdleTimeAfterRedstone()<dci.getLastRedstoneDrop()){

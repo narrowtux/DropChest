@@ -46,12 +46,12 @@ public class DropChestVehicleListener extends VehicleListener {
 		}
 		
 		List<Block> facings = new ArrayList<Block>();
-		facings.add(b.getFace(BlockFace.NORTH));
-		facings.add(b.getFace(BlockFace.EAST));
-		facings.add(b.getFace(BlockFace.SOUTH));
-		facings.add(b.getFace(BlockFace.WEST));
-		facings.add(b.getFace(BlockFace.UP));
-		facings.add(b.getFace(BlockFace.DOWN));
+		facings.add(b.getRelative(BlockFace.NORTH));
+		facings.add(b.getRelative(BlockFace.EAST));
+		facings.add(b.getRelative(BlockFace.SOUTH));
+		facings.add(b.getRelative(BlockFace.WEST));
+		facings.add(b.getRelative(BlockFace.UP));
+		facings.add(b.getRelative(BlockFace.DOWN));
 		Location loc = v.getLocation();
 		int x = loc.getBlockX();
 		int z = loc.getBlockZ();

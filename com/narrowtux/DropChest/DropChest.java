@@ -45,8 +45,6 @@ public class DropChest extends JavaPlugin {
 	private final DropChestWorldListener worldListener = new DropChestWorldListener();
 	private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
 	private EntityWatcher entityWatcher;
-	private int requestedRadius;
-	private Player requestPlayer;
 	public PermissionHandler Permissions = null;
 	@SuppressWarnings("unused")
 	private String version = "0.0";
@@ -57,7 +55,6 @@ public class DropChest extends JavaPlugin {
 	
 	public DropChest() {
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
-		requestedRadius = 2;
 		DropChestPlayer.plugin = this;
 		DropChestWorldListener.plugin = this;
 	}
@@ -86,7 +83,6 @@ public class DropChest extends JavaPlugin {
 		//Read configuration
 		File settings = new File(getDataFolder().getAbsolutePath()+"/dropchest.cfg");
 		config = new Configuration(settings);
-		requestedRadius = config.getDefaultRadius();
 		
 		// Load our stuff
 		load();
@@ -266,10 +262,7 @@ public class DropChest extends JavaPlugin {
 					}
 					DropChestPlayer player2 = DropChestPlayer.getPlayerByName(player.getName());
 					player2.setChestRequestType(ChestRequestType.CREATE);
-					if(sender.getClass().getName().contains("Player"))
-						requestPlayer = (Player)sender;
-					else
-						requestPlayer = null;
+					int requestedRadius = config.getDefaultRadius();
 					if(args.length==2&&hasPermission(player, "dropchest.radius.set")){
 						requestedRadius = (int)Integer.valueOf(args[1]);
 						if(requestedRadius>getMaximumRadius(player)&&!hasPermission(player, "dropchest.radius.setBig")){
@@ -713,16 +706,7 @@ public class DropChest extends JavaPlugin {
 		return false;
 	}
 
-	public Player getRequestPlayer() {
-		return requestPlayer;
-	}
-
-	public int getRequestedRadius() {
-		return requestedRadius;
-	}
-
 	public int getMaximumRadius(Player player) {
-		return 65536;/*
 		if(player == null){
 			return 65536;
 		} else {
@@ -736,7 +720,7 @@ public class DropChest extends JavaPlugin {
 					max = config.getFallbackRadius();
 			}
 			return max;
-		}*/
+		}
 	}
 
 	public boolean hasPermission(Player player, String node){

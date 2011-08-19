@@ -1,5 +1,8 @@
 package com.narrowtux.DropChest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
@@ -11,7 +14,9 @@ public class DropChestPlayer {
 	private FilterType editingFilterType = FilterType.SUCK;
 	private int requestedRadius = 2;
 	private ChestRequestType chestRequestType = ChestRequestType.NONE;
+	private List<DropChestItem> dropChests = new ArrayList<DropChestItem>();
 	private boolean editingFilter = false;
+	
 	public boolean isEditingFilter() {
 		return editingFilter;
 	}
@@ -81,5 +86,17 @@ public class DropChestPlayer {
 		for(String line:message.split("\n")){
 			getPlayer().sendMessage(line);
 		}
+	}
+	
+	public void addChest(DropChestItem item){
+		dropChests.add(item);
+	}
+	
+	public void removeChest(DropChestItem item){
+		dropChests.remove(item);
+	}
+	
+	public List<DropChestItem> getChests(){
+		return Collections.unmodifiableList(dropChests);
 	}
 }

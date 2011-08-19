@@ -705,6 +705,10 @@ public class DropChestItem {
 		return lastRedstoneDrop/1000;
 	}
 
+	public DropChestPlayer getOwnerDCPlayer() {
+		return DropChestPlayer.getPlayerByName(getOwner());
+	}
+
 
 	
 }

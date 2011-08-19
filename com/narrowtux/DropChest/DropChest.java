@@ -45,7 +45,7 @@ public class DropChest extends JavaPlugin {
 	private List<DropChestItem> chests = new ArrayList<DropChestItem>();
 	private Map<Integer, DropChestItem> chestsHashInteger = new HashMap<Integer, DropChestItem>();
 	private Map<String, DropChestItem> chestsHashName = new HashMap<String, DropChestItem>();
-	private Map<Block, DropChestItem> chestsHashBlocks = new HashMap<Block, DropChestItem>();
+	private Map<Integer, DropChestItem> chestsHashBlocks = new HashMap<Integer, DropChestItem>();
 	private final DropChestPlayerListener playerListener = new DropChestPlayerListener(this);
 	private final DropChestBlockListener blockListener = new DropChestBlockListener(this);
 	private final DropChestWorldListener worldListener = new DropChestWorldListener();
@@ -97,8 +97,10 @@ public class DropChest extends JavaPlugin {
 	public void addChest(DropChestItem item){
 		chestsHashInteger.put(item.getId(), item);
 		chestsHashName.put(item.getName(), item);
-		chestsHashBlocks.put(item.getBlock(), item);
+		chestsHashBlocks.put(item.getBlock().getLocation().hashCode(), item);
 		chests.add(item);
+		DropChestPlayer player = item.getOwnerDCPlayer();
+		player.addChest(item);
 		save();
 	}
 
@@ -311,7 +313,8 @@ public class DropChest extends JavaPlugin {
 
 					//Page limit is 6 items per page
 					//calculation of needed pages
-					int num = getChestCount();
+					List<DropChestItem> chests = dplayer.getChests();
+					int num = chests.size();
 					int needed = (int) Math.ceil((double)num/6.0);
 					int current = 1;
 					if(args.length==2){
@@ -324,8 +327,8 @@ public class DropChest extends JavaPlugin {
 					}
 					sender.sendMessage(ChatColor.BLUE.toString()+"Name | % full | filters | radius");
 					sender.sendMessage(ChatColor.BLUE.toString()+"------");
-					for(i = (current-1)*6;i<Math.min(current*6, getChestCount()); i++){
-						//sender.sendMessage(chests.get(i).listString()); //TODO: Per player chest information
+					for(i = (current-1)*6;i<Math.min(current*6, chests.size()); i++){
+						sender.sendMessage(chests.get(i).listString());
 					}
 
 				} else if(args[0].equalsIgnoreCase("tp")){
@@ -713,6 +716,7 @@ public class DropChest extends JavaPlugin {
 		chestsHashBlocks.remove(dci.getBlock());
 		chestsHashInteger.remove(dci.getId());
 		chestsHashName.remove(dci.getName());
+		dci.getOwnerDCPlayer().removeChest(dci);
 	}
 	
 	public void updateName(DropChestItem dci){
@@ -790,7 +794,7 @@ public class DropChest extends JavaPlugin {
 
 	public DropChestItem getChestByBlock(Block block)
 	{
-		return chestsHashBlocks.get(block);
+		return chestsHashBlocks.get(block.getLocation().hashCode());
 	}
 
 	public DropChestItem getChestById(int id){

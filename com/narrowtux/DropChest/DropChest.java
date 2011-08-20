@@ -130,6 +130,31 @@ public class DropChest extends JavaPlugin {
 			log.log(Level.INFO, "DropChest directory does not exist. Creating on next save!");
 			return;
 		}
+		File yamlFile = new File(dir, "dropchests.yml");
+		if(yamlFile.exists()){
+			//TODO: Do yaml loading
+			Yaml yaml = new Yaml();
+			try {
+				FileReader reader = new FileReader(yamlFile);
+				@SuppressWarnings("unchecked")
+				Map<String, Object> chests = (Map<String, Object>) yaml.load(reader);
+				for(Object chest:chests.values()){
+					@SuppressWarnings("unchecked")
+					Map<String, Object> chestconv = (Map<String, Object>)chest;
+					DropChestItem item = new DropChestItem(chestconv, this);
+					if(item.isLoadedProperly()){
+						addChest(item);
+						log.log(Level.INFO, "Chest loaded.");
+					}
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;
+		}
+		
+		// Obsolete txt csv loading - just for transition
 		File file = new File(dir.getAbsolutePath()+"/DropChest.txt");
 		if(file.exists()){
 			FileInputStream input;
@@ -784,12 +809,11 @@ public class DropChest extends JavaPlugin {
 	}
 
 	public Location locationOf(Block block){
-		Location ret = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
-		return ret;
+		return block.getLocation();
 	}
 
 	public boolean locationsEqual(Location loc1, Location loc2){
-		return loc1.getWorld().getId()==loc2.getWorld().getId()&&loc1.getX()==loc2.getX()&&loc1.getY()==loc2.getY()&&loc1.getZ()==loc2.getZ();
+		return loc1.equals(loc2);
 	}
 
 	public DropChestItem getChestByBlock(Block block)

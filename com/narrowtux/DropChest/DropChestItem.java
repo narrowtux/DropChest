@@ -32,7 +32,6 @@ public class DropChestItem implements Serializable{
 	private static final long serialVersionUID = 2940482362395614394L;
 	
 	private ContainerBlock containerBlock;
-	private Block block;
 	
 	private int radius;
 	private int delay = 0;
@@ -55,7 +54,6 @@ public class DropChestItem implements Serializable{
 		this.containerBlock = containerBlock;
 		this.radius = radius;
 		this.plugin = plugin;
-		this.block = block;
 		loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 		id = currentId++;
 		initFilter();
@@ -66,9 +64,7 @@ public class DropChestItem implements Serializable{
 		this.plugin = plugin;
 		initFilter();
 		load(loadString, fileVersion);
-		if(block != null){
-			loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
-		}
+
 	}
 	
 	public DropChestItem(Map<String, Object> loadMap, DropChest plugin){
@@ -87,8 +83,8 @@ public class DropChestItem implements Serializable{
 	}
 
 	public ContainerBlock getChest() {
-		if(block.getState() instanceof ContainerBlock){
-			containerBlock = (ContainerBlock)block.getState();
+		if(getBlock().getState() instanceof ContainerBlock){
+			containerBlock = (ContainerBlock)getBlock().getState();
 			return containerBlock;
 		} else {
 			return null;
@@ -225,7 +221,7 @@ public class DropChestItem implements Serializable{
 	}
 
 	public void setRedstone(boolean value){
-		Block below = block.getRelative(BlockFace.DOWN);
+		Block below = getBlock().getRelative(BlockFace.DOWN);
 		if(below.getTypeId() == Material.LEVER.getId()){
 			byte data = below.getData();
 			if(value){
@@ -247,8 +243,8 @@ public class DropChestItem implements Serializable{
 		if(isProtect()){
 			return;
 		}
-		World world = block.getWorld();
-		Location loc = block.getLocation();
+		World world = getBlock().getWorld();
+		Location loc = getBlock().getLocation();
 		for(int i = 0; i<containerBlock.getInventory().getSize();i++){
 			ItemStack item = containerBlock.getInventory().getItem(i);
 			if(item.getAmount()!=0){
@@ -285,7 +281,7 @@ public class DropChestItem implements Serializable{
 						ContainerBlock chest = (ContainerBlock)b.getState();
 						this.containerBlock = chest;
 						this.radius = radius;
-						this.block = b;
+						this.loc = b.getLocation();
 						if(locSplit.length>=6){
 							List<Material> filter = getFilter(FilterType.SUCK);
 							for(int i = 5;i<locSplit.length;i++){
@@ -390,7 +386,7 @@ public class DropChestItem implements Serializable{
 						Block b = world.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
 						if(acceptsBlockType(b.getType())){
 							this.containerBlock = (ContainerBlock)b.getState();
-							this.block = b;
+							this.loc = b.getLocation();
 							if(this.containerBlock==null){
 								loadedProperly = false;
 								System.out.println("Chest is null...");
@@ -422,7 +418,6 @@ public class DropChestItem implements Serializable{
 	{
 		// VERSION!!!! 0.7
 		String line = "";
-		Location loc = block.getLocation();
 		line = String.valueOf(loc.getX()) + "," + String.valueOf(loc.getY()) + "," + String.valueOf(loc.getZ()) + "," + String.valueOf(getRadius()) + "," + String.valueOf(loc.getWorld().getName());
 		line += ",";
 		line += "," + String.valueOf(loc.getWorld().getEnvironment());
@@ -456,11 +451,11 @@ public class DropChestItem implements Serializable{
 	}
 
 	public Block getBlock() {
-		return block;
+		return loc.getBlock();
 	}
 
 	public void setBlock(Block block) {
-		this.block = block;
+		this.loc = block.getLocation();
 	}
 
 	static public boolean acceptsBlockType(Material m){
@@ -644,15 +639,15 @@ public class DropChestItem implements Serializable{
 	}
 
 	public boolean isChest(){
-		return block.getType().equals(Material.CHEST);
+		return getBlock().getType().equals(Material.CHEST);
 	}
 
 	public boolean isFurnace(){
-		return block.getType().equals(Material.FURNACE) || block.getType().equals(Material.BURNING_FURNACE);
+		return getBlock().getType().equals(Material.FURNACE) || getBlock().getType().equals(Material.BURNING_FURNACE);
 	}
 
 	public boolean isDispenser(){
-		return block.getType().equals(Material.DISPENSER);
+		return getBlock().getType().equals(Material.DISPENSER);
 	}
 
 	/**
@@ -732,15 +727,16 @@ public class DropChestItem implements Serializable{
 		chest.put("location", locationToString(loc));
 		Map<String, Object> filters = new HashMap<String, Object>();
 		for(FilterType type:FilterType.values()){
-			String filter[] = {};
+			ArrayList<String> filter = new ArrayList<String>();
 			for(Material mat:getFilter(type)){
-				filter[filter.length] = ""+mat.getId();
+				filter.add(""+mat.getId());
 			}
 			filters.put(type.toString(), filter);
 		}
 		chest.put("filter", filters);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void load(Map<String, Object> loadMap) {
 		id = (Integer)loadMap.get("id");
 		setName((String)loadMap.get("name"));
@@ -748,8 +744,18 @@ public class DropChestItem implements Serializable{
 		setDelay((Integer)loadMap.get("delay"));
 		setProtect((Boolean)loadMap.get("protect"));
 		setRadius((Integer)loadMap.get("radius"));
-		loc = locationFromString((String[])loadMap.get("location"));
-		//TODO: load filters
+		loc = locationFromString((ArrayList<String>)loadMap.get("location"));
+		
+		Map<String, Object> filters = (Map<String, Object>)loadMap.get("filter");
+		for(String typename:filters.keySet()){
+			FilterType type = FilterType.valueOf(typename);
+			List<Material> filter = getFilter(type);
+			ArrayList<String> items = (ArrayList<String>)filters.get(typename);
+			for(String item:items)
+			{
+				filter.add(Material.getMaterial(Integer.valueOf(item)));
+			}
+		}
 	}
 
 	private String [] locationToString(Location loc){
@@ -763,11 +769,11 @@ public class DropChestItem implements Serializable{
 		return ret;
 	}
 	
-	private Location locationFromString(String [] args){
-		World w = Bukkit.getServer().createWorld(args[0], Environment.valueOf(args[1]));
-		int x = Integer.valueOf(args[2]);
-		int y = Integer.valueOf(args[3]);
-		int z = Integer.valueOf(args[4]);
+	private Location locationFromString(ArrayList<String> args){
+		World w = Bukkit.getServer().createWorld(args.get(0), Environment.valueOf(args.get(1)));
+		int x = Integer.valueOf(args.get(2));
+		int y = Integer.valueOf(args.get(3));
+		int z = Integer.valueOf(args.get(4));
 		return new Location(w, x, y, z);
 	}
 }

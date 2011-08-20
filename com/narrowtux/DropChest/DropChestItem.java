@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -41,7 +42,7 @@ public class DropChestItem implements Serializable{
 	private int id;
 	private HashMap<FilterType,List<Material > > filter = new HashMap<FilterType,List<Material> >();
 	
-	private boolean warnedNearlyFull;
+	private boolean warnedNearlyFull = false;
 	private DropChest plugin;
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
 	private boolean loadedProperly = true;
@@ -53,33 +54,36 @@ public class DropChestItem implements Serializable{
 	{
 		this.containerBlock = containerBlock;
 		this.radius = radius;
-		warnedNearlyFull = false;
 		this.plugin = plugin;
 		this.block = block;
 		loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 		id = currentId++;
-		List<Material> f = new ArrayList<Material>();
-		filter.put(FilterType.SUCK, f);
-		f = new ArrayList<Material>();
-		filter.put(FilterType.PUSH, f);
-		f = new ArrayList<Material>();
-		filter.put(FilterType.PULL, f);
+		initFilter();
 	}
 
 	public DropChestItem(String loadString, String fileVersion, DropChest plugin)
 	{
 		this.plugin = plugin;
-		warnedNearlyFull = false;
+		initFilter();
+		load(loadString, fileVersion);
+		if(block != null){
+			loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
+		}
+	}
+	
+	public DropChestItem(Map<String, Object> loadMap, DropChest plugin){
+		this.plugin = plugin;
+		initFilter();
+		load(loadMap);
+	}
+
+	private void initFilter(){
 		List<Material> f = new ArrayList<Material>();
 		filter.put(FilterType.SUCK, f);
 		f = new ArrayList<Material>();
 		filter.put(FilterType.PUSH, f);
 		f = new ArrayList<Material>();
 		filter.put(FilterType.PULL, f);
-		load(loadString, fileVersion);
-		if(block != null){
-			loc = new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
-		}
 	}
 
 	public ContainerBlock getChest() {
@@ -736,6 +740,17 @@ public class DropChestItem implements Serializable{
 		}
 		chest.put("filter", filters);
 	}
+	
+	private void load(Map<String, Object> loadMap) {
+		id = (Integer)loadMap.get("id");
+		setName((String)loadMap.get("name"));
+		setOwner((String)loadMap.get("owner"));
+		setDelay((Integer)loadMap.get("delay"));
+		setProtect((Boolean)loadMap.get("protect"));
+		setRadius((Integer)loadMap.get("radius"));
+		loc = locationFromString((String[])loadMap.get("location"));
+		//TODO: load filters
+	}
 
 	private String [] locationToString(Location loc){
 		String [] ret = {
@@ -747,6 +762,12 @@ public class DropChestItem implements Serializable{
 		};
 		return ret;
 	}
-
 	
+	private Location locationFromString(String [] args){
+		World w = Bukkit.getServer().createWorld(args[0], Environment.valueOf(args[1]));
+		int x = Integer.valueOf(args[2]);
+		int y = Integer.valueOf(args[3]);
+		int z = Integer.valueOf(args[4]);
+		return new Location(w, x, y, z);
+	}
 }

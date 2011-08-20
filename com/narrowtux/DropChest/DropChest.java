@@ -115,12 +115,12 @@ public class DropChest extends JavaPlugin {
 					this.Permissions = ((Permissions)test).getHandler();
 				} catch(Exception e) {
 					this.Permissions = null;
-					log.log(Level.WARNING, "Permissions is not enabled! All Operations are allowed!");
+					//log.log(Level.WARNING, "Permissions is not enabled! All Operations are allowed!");
 				}
 			}
 		} catch(java.lang.NoClassDefFoundError e){
 			this.Permissions = null;
-			log.log(Level.WARNING, "Permissions not found! All Operations are allowed!");
+			//log.log(Level.WARNING, "Permissions not found! All Operations are allowed!");
 		}
 	}
 
@@ -744,7 +744,7 @@ public class DropChest extends JavaPlugin {
 	public boolean hasPermission(Player player, String node){
 		if(Permissions==null)
 		{
-			return true;
+			return player.hasPermission(node);
 		}
 		if(player==null)
 		{

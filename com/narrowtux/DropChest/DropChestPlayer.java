@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class DropChestPlayer {
 	@SuppressWarnings("unused")
-	private Player player = null;
 	private String playerName = "";
 	private FilterType editingFilterType = FilterType.SUCK;
 	private int requestedRadius = 2;
@@ -30,9 +30,8 @@ public class DropChestPlayer {
 	public static DropChest plugin;
 	
 
-	public DropChestPlayer(Player p){
-		player = p;
-		playerName = p.getName();
+	private DropChestPlayer(String p){
+		playerName = p;
 	}
 	
 	
@@ -63,23 +62,14 @@ public class DropChestPlayer {
 		return plugin.getServer().getPlayer(playerName);
 	}
 	
-	public void setPlayer(Player player) {
-		this.player = player;
-	}
-	
 	public static DropChestPlayer getPlayerByName(String name){
 		if(players.containsKey(name)){
 			return players.get(name);
 		} else {
-			Player pl = plugin.getServer().getPlayer(name);
-			if(pl!=null){
-				DropChestPlayer p = new DropChestPlayer(pl);
-				players.put(name, p);
-				return p;
-			}
+			DropChestPlayer p = new DropChestPlayer(name);
+			players.put(name, p);
+			return p;
 		}
-		plugin.log.log(Level.WARNING,"Player "+name+" not found.");
-		return null;
 	}
 	
 	public void sendMessage(String message){

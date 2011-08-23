@@ -43,7 +43,7 @@ public class DropChestBlockListener extends BlockListener {
 		Block block = event.getBlock();
 		BlockFace faces[] = {BlockFace.NORTH,BlockFace.EAST,BlockFace.SOUTH,BlockFace.WEST};
 		for(BlockFace face:faces){
-			Block chest = block.getFace(face);
+			Block chest = block.getRelative(face);
 			if(DropChestItem.acceptsBlockType(chest.getType())){
 				DropChestItem dci = plugin.getChestByBlock(chest);
 				if(dci!=null){
@@ -53,7 +53,7 @@ public class DropChestBlockListener extends BlockListener {
 			}
 		}
 		Block chest = null;
-		chest = block.getFace(BlockFace.UP).getFace(BlockFace.UP);
+		chest = block.getRelative(BlockFace.UP).getRelative(BlockFace.UP);
 		DropChestItem dci = plugin.getChestByBlock(chest);
 		if(dci!=null){
 			dci.dropAll();

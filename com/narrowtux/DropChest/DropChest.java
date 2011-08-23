@@ -738,7 +738,7 @@ public class DropChest extends JavaPlugin {
 
 	public void removeChest(DropChestItem dci) {
 		chests.remove(dci);
-		chestsHashBlocks.remove(dci.getBlock());
+		chestsHashBlocks.remove(dci.getBlock().getLocation().hashCode());
 		chestsHashInteger.remove(dci.getId());
 		chestsHashName.remove(dci.getName());
 		dci.getOwnerDCPlayer().removeChest(dci);

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -136,7 +137,16 @@ public class DropChestItem implements Serializable{
 	}
 
 	public double getPercentFull(){
-		Inventory inv = getInventory();
+		Inventory inv;
+		try{
+			inv = getInventory();
+		} catch(NullPointerException e){
+			if(getBlock().getChunk().isLoaded()){
+				plugin.removeChest(this);
+				plugin.log.log(Level.WARNING, "Removed 1 Chest because it isn't there any more.");
+			}
+			return 0;
+		}
 		int stacks = inv.getSize();
 		int maxStackSize = 0;
 		int totalItems = 0;

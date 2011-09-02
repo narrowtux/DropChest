@@ -14,7 +14,6 @@ Source
 ------
 The latest and greatest source can be found on [GitHub].  
 Download the latest builds from [Jenkins].  
-View the latest [Javadoc].
 
 Compiling
 ---------
@@ -38,7 +37,6 @@ Please follow the above conventions if you want your pull requests accepted.
 [License]: http://www.gnu.org/licenses/gpl.html
 [Forum]: http://forums.bukkit.org/threads/3835/
 [GitHub]: https://github.com/narrowtux/DropChest
-[Javadoc]: http://ci.craftfire.com/view/narrowtux/job/DropChest/javadoc
-[Jenkins]: http://ci.craftfire.com/view/narrowtux
+[Jenkins]: http://ci.craftfire.com/job/DropChest
 [Issues]: https://github.com/narrowtux/DropChest/issues
 [Twitter]: http://twitter.com/narrowtux

@@ -19,7 +19,7 @@ Compiling
 ---------
 DropChest uses Maven to handle its dependencies.
 
-DropChest requires CraftBukkit (preferrably the latest version or source).  
+DropChest requires Bukkit and Permissions 3.x (preferrably the latest versions or source).  
 * Install [Maven 2 or 3](http://maven.apache.org/download.html)  
 * Checkout this repo and run: `mvn clean`
 

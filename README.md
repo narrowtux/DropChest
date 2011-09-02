@@ -1,4 +1,4 @@
-[Project Logo]
+![][Project Logo]
 DropChest
 =========
 

@@ -1,42 +1,41 @@
 package com.narrowtux.DropChest;
 
+import java.io.BufferedReader;
 import java.io.File;
-import org.bukkit.ChatColor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.HashMap;
-import org.bukkit.entity.Player;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.PluginManager;
-
-import com.narrowtux.DropChest.EntityWatcher;
-
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import java.io.*;
-import com.nijikokun.bukkit.Permissions.Permissions;
-import com.nijiko.data.YamlCreator;
-import com.nijiko.permissions.PermissionHandler;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Priority;
+import org.bukkit.event.Event.Type;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
+
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 /**
  * DropChest for Bukkit
@@ -756,13 +755,16 @@ public class DropChest extends JavaPlugin {
 			if(Permissions==null){
 				return 65536;
 			}
-			int max = Permissions.getUserPermissionInteger(player.getWorld().getName(), player.getName(), "dropchestmaxradius");
-			if(max==-1){
-				max = Permissions.getGroupPermissionInteger(player.getWorld().getName(), Permissions.getGroup(player.getWorld().getName(), player.getName()), "dropchestmaxradius");
-				if(max==-1)
-					max = config.getFallbackRadius();
-			}
-			return max;
+			try{
+				int max = Permissions.getUserPermissionInteger(player.getWorld().getName(), player.getName(), "dropchestmaxradius");
+				if(max==-1){
+					max = Permissions.getGroupPermissionInteger(player.getWorld().getName(), Permissions.getGroup(player.getWorld().getName(), player.getName()), "dropchestmaxradius");
+					if(max==-1)
+						max = config.getFallbackRadius();
+				}
+				return max;
+			}catch(Exception e){}
+			return 65536;
 		}
 	}
 

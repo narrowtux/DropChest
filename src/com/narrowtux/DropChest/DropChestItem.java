@@ -763,6 +763,7 @@ public class DropChestItem implements Serializable{
 				filter.add(Material.getMaterial(Integer.valueOf(item)));
 			}
 		}
+		currentId = Math.max(id + 1, currentId);
 	}
 
 	private String [] locationToString(Location loc){

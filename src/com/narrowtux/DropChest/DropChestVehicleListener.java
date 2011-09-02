@@ -2,16 +2,10 @@ package com.narrowtux.DropChest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-
-import net.minecraft.server.EntityMinecart;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.entity.CraftMinecart;
-import org.bukkit.craftbukkit.entity.CraftStorageMinecart;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.StorageMinecart;
 import org.bukkit.event.vehicle.VehicleListener;

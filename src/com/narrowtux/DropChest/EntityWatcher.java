@@ -2,18 +2,16 @@ package com.narrowtux.DropChest;
 
 import java.util.Date;
 import java.util.HashMap;
+
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.block.Block;
-
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import com.narrowtux.DropChest.DropChest;
 import com.narrowtux.DropChest.API.DropChestSuckEvent;
-
-import org.bukkit.entity.Item;
 
 public class EntityWatcher implements Runnable {
 	private DropChest plugin;

@@ -1,4 +1,22 @@
-package com.narrowtux.DropChest;
+/*
+ * Copyright (C) 2011 Moritz Schmale <narrow.m@gmail.com>
+ *
+ * DropChest is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ */
+
+package com.narrowtux.dropchest;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,13 +42,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
-import com.narrowtux.DropChest.API.DropChestFillEvent;
+import com.narrowtux.dropchest.api.DropChestFillEvent;
 
 public class DropChestItem implements Serializable{
 	private static final long serialVersionUID = 2940482362395614394L;
-	
+
 	private ContainerBlock containerBlock;
-	
+
 	private int radius;
 	private int delay = 0;
 	private String owner = "";
@@ -38,7 +56,7 @@ public class DropChestItem implements Serializable{
 	private String name = "";
 	private int id;
 	private HashMap<FilterType,List<Material > > filter = new HashMap<FilterType,List<Material> >();
-	
+
 	private boolean warnedNearlyFull = false;
 	private DropChest plugin;
 	private DropChestMinecartAction minecartAction = DropChestMinecartAction.IGNORE;
@@ -64,7 +82,7 @@ public class DropChestItem implements Serializable{
 		load(loadString, fileVersion);
 
 	}
-	
+
 	public DropChestItem(Map<String, Object> loadMap, DropChest plugin){
 		this.plugin = plugin;
 		initFilter();
@@ -88,7 +106,7 @@ public class DropChestItem implements Serializable{
 			return null;
 		}
 	}
-	
+
 	public Inventory getInventory(){
 		//First, check if this is a double chest.
 		BlockFace faces[] = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
@@ -122,16 +140,16 @@ public class DropChestItem implements Serializable{
 			getOwnerPlayer().sendMessage(ChatColor.RED.toString()+"Chest radius is 0, the chest will not suck");
 		this.radius = radius;
 	}
-	
+
 	public void setDelay(int delay) {
 		this.delay = (delay >= 0 ? delay : 0);
 	}
-	
+
 	public int getDelay()
 	{
 		return delay;
 	}
-	
+
 	public Player getOwnerPlayer(){
 		return Bukkit.getServer().getPlayer(getOwner());
 	}
@@ -160,7 +178,7 @@ public class DropChestItem implements Serializable{
 					maxStackSize+=istack.getMaxStackSize();
 				}
 			}
-			
+
 		}
 		double percent = (double)totalItems/(double)maxStackSize;
 		if(percent<plugin.config.getWarnFillStatus()/100)
@@ -495,7 +513,7 @@ public class DropChestItem implements Serializable{
 			//item stacks of furnaces:
 			// stack 1: fuel, can be either wood or coal
 			// stack 0: meltables, can be ores, sand, cobblestone, log and cactus
-			// stack 2: products 
+			// stack 2: products
 			ItemStack items[] = miinv.getContents();
 			ItemStack furn[] = chinv.getContents();
 			for(int i = 0; i<items.length;i++)
@@ -603,7 +621,7 @@ public class DropChestItem implements Serializable{
 			}
 		}
 	}
-	
+
 	public String info(){
 		String ret = ChatColor.WHITE.toString();
 		String filterString = "";
@@ -711,8 +729,8 @@ public class DropChestItem implements Serializable{
 		}
 		return protect;
 	}
-	
-	
+
+
 	/**
 	 * @return the lastRedstoneDrop
 	 */
@@ -742,7 +760,7 @@ public class DropChestItem implements Serializable{
 		}
 		chest.put("filter", filters);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void load(Map<String, Object> loadMap) {
 		id = (Integer)loadMap.get("id");
@@ -752,7 +770,7 @@ public class DropChestItem implements Serializable{
 		setProtect((Boolean)loadMap.get("protect"));
 		setRadius((Integer)loadMap.get("radius"));
 		loc = locationFromString((ArrayList<String>)loadMap.get("location"));
-		
+
 		Map<String, Object> filters = (Map<String, Object>)loadMap.get("filter");
 		for(String typename:filters.keySet()){
 			FilterType type = FilterType.valueOf(typename);
@@ -763,12 +781,11 @@ public class DropChestItem implements Serializable{
 				filter.add(Material.getMaterial(Integer.valueOf(item)));
 			}
 		}
-		currentId = Math.max(id + 1, currentId);
 	}
 
 	private String [] locationToString(Location loc){
 		String [] ret = {
-				loc.getWorld().getName(), 
+				loc.getWorld().getName(),
 				loc.getWorld().getEnvironment().toString(),
 				loc.getBlockX()+"",
 				loc.getBlockY()+"",
@@ -776,7 +793,7 @@ public class DropChestItem implements Serializable{
 		};
 		return ret;
 	}
-	
+
 	private Location locationFromString(ArrayList<String> args){
 		World w = Bukkit.getServer().createWorld(args.get(0), Environment.valueOf(args.get(1)));
 		int x = Integer.valueOf(args.get(2));

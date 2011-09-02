@@ -47,6 +47,16 @@
         <repository>
             <id>craftfire-repo</id>
             <url>http://repo.craftfire.com</url>
+            <releases>
+                <updatePolicy>daily</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>craftfire-dbrepo</id>
+            <url>http://db.craftfire.com/repo</url>
         </repository>
     </repositories>
 
@@ -57,6 +67,12 @@
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!-- Third-party plugins -->
+        <dependency>
+            <groupId>com.nijikokun.bukkit</groupId>
+            <artifactId>permissions</artifactId>
+            <version>3.1.6</version>
         </dependency>
     </dependencies>
 

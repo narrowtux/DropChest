@@ -2,26 +2,26 @@
 DropChest
 =========
 
-Copyright &copy; 2011, Moritz Schmale <narrow.m@gmail.com>
+Copyright &copy; 2011, Moritz Schmale <narrow.m@gmail.com>  
 DropChest is licensed under [GNU GENERAL PUBLIC LICENSE Version 3][License]
 
-Get support on my [Bukkit forum thread][Forum].
-Track and submit issues and bugs on my [issue tracker][Issues].
+Get support on my [Bukkit forum thread][Forum].  
+Track and submit issues and bugs on my [issue tracker][Issues].  
 
 Follow narrowtux on Twitter [@narrowtux][Twitter]
 
 Source
 ------
-The latest and greatest source can be found on [GitHub].
-Download the latest builds from [Jenkins].
+The latest and greatest source can be found on [GitHub].  
+Download the latest builds from [Jenkins].  
 View the latest [Javadoc].
 
 Compiling
 ---------
 DropChest uses Maven to handle its dependencies.
 
-DropChest requires CraftBukkit (preferrably the latest version or source).
-* Install [Maven 2 or 3](http://maven.apache.org/download.html)
+DropChest requires CraftBukkit (preferrably the latest version or source).  
+* Install [Maven 2 or 3](http://maven.apache.org/download.html)  
 * Checkout this repo and run: `mvn clean`
 
 Coding and Pull Request Formatting

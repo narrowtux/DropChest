@@ -1,4 +1,21 @@
-package com.narrowtux.DropChest;
+/*
+ * Copyright (C) 2011 Moritz Schmale <narrow.m@gmail.com>
+ *
+ * DropChest is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ */
+
+package com.narrowtux.dropchest;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,18 +30,18 @@ public class FlatFileReader {
 	private File file;
 	private boolean caseSensitive;
 	private HashMap<String, String> keySet = new HashMap<String,String>();
-	
+
 	public FlatFileReader(File file, boolean caseSensitive){
 		this.file = file;
 		this.caseSensitive = caseSensitive;
 		reload();
 	}
-	
+
 	public void reload(){
 		keySet.clear();
 		load();
 	}
-	
+
 	public int getInteger(String key, int fallback){
 		if(keySet.containsKey(key)){
 			int ret;
@@ -38,7 +55,7 @@ public class FlatFileReader {
 			return fallback;
 		}
 	}
-	
+
 	public String getString(String key, String fallback){
 		if(keySet.containsKey(key)){
 			return keySet.get(key);
@@ -46,7 +63,7 @@ public class FlatFileReader {
 			return fallback;
 		}
 	}
-	
+
 	public boolean getBoolean(String key, boolean fallback){
 		if(keySet.containsKey(key)){
 			boolean ret;
@@ -60,7 +77,7 @@ public class FlatFileReader {
 			return fallback;
 		}
 	}
-	
+
 	public double getDouble(String key, double fallback){
 		if(keySet.containsKey(key)){
 			double ret;
@@ -74,7 +91,7 @@ public class FlatFileReader {
 			return fallback;
 		}
 	}
-	
+
 	public float getFloat(String key, float fallback){
 		if(keySet.containsKey(key)){
 			float ret;
@@ -88,7 +105,7 @@ public class FlatFileReader {
 			return fallback;
 		}
 	}
-	
+
 	public Material getMaterial(String key, Material fallback){
 		if(keySet.containsKey(key)){
 			Material ret;
@@ -105,7 +122,7 @@ public class FlatFileReader {
 		}
 		return fallback;
 	}
-	
+
 	private boolean load(){
 		if(file.exists()){
 			FileInputStream input;

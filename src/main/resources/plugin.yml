@@ -1,0 +1,35 @@
+name: DropChest
+version: 0.8.1.${build.number}
+author: narrowtux
+description: Sucks dropped loot into Chests. Useful for automatic farming or gathering loot from mob traps.
+
+main: com.narrowtux.dropchest.DropChest
+
+commands:
+  dropchest:
+    aliases: dc
+    description: Access to all DropChest commands.
+  dcitem:
+    aliases: dci
+    description: Gives you the name or the ID of the passed item.
+    usage: /<command> <name|id>
+  chestinfo:
+    aliases: chi
+    description: Gives you information about a chest's contents. Omit the argument and rightclick on a non-dropchest
+    usage: /<command> <name|id>
+
+permissions:
+  dropchest.*:
+    description: Access to all DropChest commands.
+    children:
+        dropchest.create: true
+        dropchest.destroy: true
+        dropchest.remove: true
+        dropchest.list: true
+        dropchest.which: true
+        dropchest.teleport: true
+        dropchest.radius.set: true
+        dropchest.radius.setBig: true
+        dropchest.filter.set: true
+        dropchest.filter.reset: true
+        dropchest.moderator: true

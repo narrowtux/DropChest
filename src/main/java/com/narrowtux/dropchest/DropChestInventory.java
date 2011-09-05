@@ -1,4 +1,21 @@
-package com.narrowtux.DropChest;
+/*
+ * Copyright (C) 2011 Moritz Schmale <narrow.m@gmail.com>
+ *
+ * DropChest is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ */
+
+package com.narrowtux.dropchest;
 
 import java.util.HashMap;
 
@@ -7,13 +24,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class DropChestInventory implements Inventory {
-	
+
 	private Inventory inventories[];
 
 	public DropChestInventory(Inventory...inventories ){
 		this.inventories = inventories;
 	}
-	
+
 	@Override
 	public HashMap<Integer, ItemStack> addItem(ItemStack... arg0) {
 		//Confirmed to work.
@@ -26,7 +43,7 @@ public class DropChestInventory implements Inventory {
 			if(ret.size()==0){
 				return ret;
 			} else {
-				ItemStack demo[] = {}; 
+				ItemStack demo[] = {};
 				ItemStack items[] = (ItemStack[])ret.values().toArray(demo);
 				ret = inv.addItem(items);
 			}
@@ -235,7 +252,7 @@ public class DropChestInventory implements Inventory {
 	public void setItem(int arg0, ItemStack arg1) {
 		mapToLocalInventory(arg0).setItem(mapToLocalSlot(arg0), arg1);
 	}
-	
+
 	private Inventory mapToLocalInventory(int slot){
 		//confirmed to work.
 		//Maps a given global slot id to the corresponding local inventory
@@ -248,7 +265,7 @@ public class DropChestInventory implements Inventory {
 		}
 		return null;
 	}
-	
+
 	private int mapToLocalSlot(int slot){
 		//confirmed to work.
 		//Maps a given global slot id to the corresponding local slot of the inventory
@@ -264,7 +281,7 @@ public class DropChestInventory implements Inventory {
 		}
 		return -1;
 	}
-	
+
 	private int mapToGlobalSlot(int slot, Inventory localinv){
 		for(Inventory inv:inventories){
 			if(inv==localinv){

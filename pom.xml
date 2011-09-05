@@ -1,0 +1,111 @@
+<!--
+  Maven build file for DropChest
+
+  Copyright (c) 2011 Moritz Schmale <narrow.m@gmail.com>
+  DropChest is licensed under GNU GENERAL PUBLIC LICENSE Version 3
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Project information -->
+    <groupId>com.narrowtux</groupId>
+    <artifactId>dropchest</artifactId>
+    <version>dev-SNAPSHOT</version>
+    <name>DropChest</name>
+    <url>http://www.narrowtux.com</url>
+    <description></description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- License -->
+    <licenses>
+        <license>
+            <name>GNU GENERAL PUBLIC LICENSE Version 3</name>
+            <url>http://www.gnu.org/licenses/gpl.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!-- Source code -->
+    <scm>
+        <developerConnection>scm:git:git@github.com:narrowtux/${project.name}.git</developerConnection>
+        <connection>scm:git:git://github.com/narrowtux/${project.name}.git</connection>
+        <url>https://github.com/narrowtux/${project.name}</url>
+    </scm>
+
+    <!-- Continuous integration -->
+    <ciManagement>
+        <system>jenkins</system>
+        <url>http://ci.craftfire.com</url>
+    </ciManagement>
+
+    <!-- Repository locations -->
+    <repositories>
+        <repository>
+            <id>craftfire-repo</id>
+            <url>http://repo.craftfire.com</url>
+            <releases>
+                <updatePolicy>daily</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>craftfire-dbrepo</id>
+            <url>http://db.craftfire.com/repo</url>
+        </repository>
+    </repositories>
+
+    <!-- Dependencies -->
+    <dependencies>
+        <!-- Bukkit -->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!-- Third-party plugins -->
+        <dependency>
+            <groupId>com.nijikokun.bukkit</groupId>
+            <artifactId>permissions</artifactId>
+            <version>3.1.6</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>clean</defaultGoal>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <!-- Resources -->
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>LICENSE.txt</include>
+                    <include>plugin.yml</include>
+                </includes>
+            </resource>
+        </resources>
+        <!-- Plugins -->
+        <plugins>
+            <!-- Compile plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+            </plugin>
+            <!-- JAR creation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

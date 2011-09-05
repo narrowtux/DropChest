@@ -15,7 +15,7 @@ commands:
   description: Gives you information about a chests contents. Omit the argument and rightclick on a non-dropchest
   usage: /chestinfo {name|id}
 permissions:
- dropchest.use:
+ dropchest:
   description: basic permission to gain usage of this plugin.
   default: true
  dropchest.create:

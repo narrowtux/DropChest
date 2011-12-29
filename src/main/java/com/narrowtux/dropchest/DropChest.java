@@ -154,7 +154,7 @@ public class DropChest extends JavaPlugin {
 					DropChestItem item = new DropChestItem(chestconv, this);
 					if(item.isLoadedProperly()){
 						addChest(item);
-						log.log(Level.INFO, "Chest loaded.");
+						//log.log(Level.INFO, "Chest loaded.");
 					}
 				}
 			} catch (FileNotFoundException e) {

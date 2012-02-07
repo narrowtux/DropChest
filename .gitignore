@@ -1,7 +1,9 @@
 # Compiled source #
 ###################
-bin/
-target/
+bin
+lib
+out
+target
 *.com
 *.class
 *.dll
@@ -11,12 +13,10 @@ target/
 
 # Git #
 #######
-.git/
+.git
 
 # Packages #
 ############
-# it's better to unpack these files and commit the raw source
-# git has its own built in compression methods
 *.7z
 *.dmg
 *.gz
@@ -42,6 +42,19 @@ Thumbs.db
 # Project files #
 #################
 .classpath
+.externalToolBuilders
 .project
 .settings
 MANIFEST.MF
+
+# Netbeans files #
+##################
+build
+dist
+nbproject
+build.xml
+
+# IntelliJ IDEA files #
+#######################
+.idea
+*.iml

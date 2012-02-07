@@ -2,7 +2,7 @@
 DropChest
 =========
 
-Copyright &copy; 2011, Moritz Schmale <narrow.m@gmail.com>  
+Copyright (c) 2011-2012, Moritz Schmale <narrow.m@gmail.com>  
 DropChest is licensed under [GNU GENERAL PUBLIC LICENSE Version 3][License]
 
 Get support on my [Bukkit forum thread][Forum].  
@@ -19,24 +19,26 @@ Compiling
 ---------
 DropChest uses Maven to handle its dependencies.
 
-DropChest requires Bukkit and Permissions 3.x (preferrably the latest versions or source).  
 * Install [Maven 2 or 3](http://maven.apache.org/download.html)  
 * Checkout this repo and run: `mvn clean`
 
 Coding and Pull Request Formatting
 ----------------------------------
-* Generally follows the Oracle coding standards.
-* DropChest uses tabs, no spaces.
+* Generally follow the Oracle coding standards.
+* Use tabs, no spaces.
+* No trailing whitespaces.
 * No 80 column limit or midstatement newlines.
 * Pull requests must compile and work.
 * Pull requests must be formatted properly.
+* Number of commits in a pull request should be kept to a minimum.
+* No merges should be included in pull requests unless the pull request's purpose is a merge.
 
-Please follow the above conventions if you want your pull requests accepted.
+**Please follow the above conventions if you want your pull request(s) accepted.**
 
 [Project Logo]: http://www.gravatar.com/avatar/f110a5b8feacea25275521f4efd0d7f2?s=148
 [License]: http://www.gnu.org/licenses/gpl.html
 [Forum]: http://forums.bukkit.org/threads/3835/
-[GitHub]: https://github.com/narrowtux/DropChest
-[Jenkins]: http://ci.craftfire.com/job/DropChest
-[Issues]: https://github.com/narrowtux/DropChest/issues
+[GitHub]: https://github.com/narrowtux/Dropchest
+[Jenkins]: http://ci.spout.org/job/Dropchest
+[Issues]: https://github.com/narrowtux/Dropchest/issues
 [Twitter]: http://twitter.com/narrowtux

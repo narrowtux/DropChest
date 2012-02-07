@@ -230,8 +230,8 @@ public class DropChest extends JavaPlugin {
 				data.put(""+dci.getId(), chest);
 			}
 			Yaml yaml = new Yaml();
-		    FileWriter writer = new FileWriter(file);
-		    yaml.dump(data, writer);
+			FileWriter writer = new FileWriter(file);
+			yaml.dump(data, writer);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -287,7 +287,7 @@ public class DropChest extends JavaPlugin {
 			} else {
 				if(args[0].equalsIgnoreCase("add")){
 					/*****************
-					 *      ADD      *
+					 *	  ADD	  *
 					 *****************/
 					if(!hasPermission(player, "dropchest.create")){
 						player.sendMessage("You may not create DropChests.");
@@ -307,7 +307,7 @@ public class DropChest extends JavaPlugin {
 					sender.sendMessage(ChatColor.GREEN.toString()+"Now rightclick on the Chest that you want to add");
 				} else if(args[0].equalsIgnoreCase("remove")){
 					/*****************
-					 *     REMOVE    *
+					 *	 REMOVE	*
 					 *****************/
 					if(!hasPermission(player, "dropchest.remove")){
 						player.sendMessage("You may not remove DropChests.");
@@ -331,7 +331,7 @@ public class DropChest extends JavaPlugin {
 					}
 				} else if(args[0].equalsIgnoreCase("list")){
 					/*****************
-					 *      LIST     *
+					 *	  LIST	 *
 					 *****************/
 					if(!hasPermission(player, "dropchest.list")){
 						player.sendMessage("You may not list DropChests.");
@@ -366,7 +366,7 @@ public class DropChest extends JavaPlugin {
 
 				} else if(args[0].equalsIgnoreCase("tp")){
 					/*****************
-					 *   TELEPORT    *
+					 *   TELEPORT	*
 					 *****************/
 					if(!hasPermission(player, "dropchest.teleport")){
 						player.sendMessage("You may not teleport to DropChests.");
@@ -441,7 +441,7 @@ public class DropChest extends JavaPlugin {
 				}
 				else if(args[0].equalsIgnoreCase("which")){
 					/*****************
-					 *     WHICH     *
+					 *	 WHICH	 *
 					 *****************/
 					if(!hasPermission(player, "dropchest.which")){
 						player.sendMessage("You may not use this command.");
@@ -455,7 +455,7 @@ public class DropChest extends JavaPlugin {
 
 				}else if(args[0].equalsIgnoreCase("filter")){
 					/*****************
-					 *     FILTER    *
+					 *	 FILTER	*
 					 *****************/
 					if(!hasPermission(player, "dropchest.filter"))
 					{
@@ -569,7 +569,7 @@ public class DropChest extends JavaPlugin {
 					}
 				} else if(args[0].equalsIgnoreCase("setname")){
 					/*****************
-					 *    SETNAME    *
+					 *	SETNAME	*
 					 *****************/
 					if(!hasPermission(player, "dropchest"))
 					{

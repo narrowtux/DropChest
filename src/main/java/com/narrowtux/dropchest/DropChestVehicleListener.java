@@ -25,17 +25,19 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.StorageMinecart;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleListener;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 
-public class DropChestVehicleListener extends VehicleListener {
+public class DropChestVehicleListener implements Listener {
 	private DropChest plugin;
 
 	public DropChestVehicleListener(DropChest plugin) {
 		this.plugin = plugin;
 	}
 
-	@Override
+	@EventHandler
 	public void onVehicleMove(VehicleMoveEvent event)
 	{
 		if(event.getVehicle() instanceof StorageMinecart){

@@ -20,16 +20,19 @@ package com.narrowtux.dropchest;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
-public class DropChestBlockListener extends BlockListener {
+public class DropChestBlockListener implements Listener {
 	private final DropChest plugin;
 	public DropChestBlockListener(final DropChest instance) {
 		plugin = instance;
 	}
-	@Override
+	
+	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event){
 		Block block = event.getBlock();
 		if(DropChestItem.acceptsBlockType(block.getType())){
@@ -46,7 +49,7 @@ public class DropChestBlockListener extends BlockListener {
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onBlockRedstoneChange(BlockRedstoneEvent event){
 		if(!plugin.config.isDropItemsOnRedstone()){
 			return;

@@ -20,20 +20,28 @@ package com.narrowtux.dropchest.api;
 import org.bukkit.entity.Item;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 
 import com.narrowtux.dropchest.DropChestItem;
 
 public class DropChestSuckEvent extends Event implements Cancellable{
-	private static final long serialVersionUID = -4108296697557863586L;
 	private DropChestItem chest;
 	private Item item;
 	private boolean cancel;
-
+	private static final HandlerList handlers = new HandlerList();
+	
 	public DropChestSuckEvent(DropChestItem chest, Item item) {
-		super("DropChestSuckEvent");
 		cancel = false;
 		this.chest = chest;
 		this.item = item;
+	}
+	
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
+	public static HandlerList getHandlerList() {
+		return handlers;
 	}
 
 	/**

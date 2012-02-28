@@ -44,7 +44,7 @@ public class DropChestInventory implements Inventory {
 				return ret;
 			} else {
 				ItemStack demo[] = {};
-				ItemStack items[] = (ItemStack[])ret.values().toArray(demo);
+				ItemStack items[] = ret.values().toArray(demo);
 				ret = inv.addItem(items);
 			}
 		}

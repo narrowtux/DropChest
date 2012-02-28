@@ -32,6 +32,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -284,45 +285,7 @@ public class DropChestItem implements Serializable{
 	private void load(String loadString, String fileVersion)
 	{
 		if(fileVersion.equalsIgnoreCase("0.0")){
-			String locSplit[] = loadString.split(",");
-			if(locSplit.length>=3){
-				Double x = Double.valueOf(locSplit[0]);
-				Double y = Double.valueOf(locSplit[1]);
-				Double z = Double.valueOf(locSplit[2]);
-
-				int radius = 2;
-				long worldid = 0;
-				if(locSplit.length>=4){
-					radius = (int)Integer.valueOf(locSplit[3]);
-					if(locSplit.length>=5){
-						worldid = (long)Long.valueOf(locSplit[4]);
-					}
-				}
-				World wo = plugin.getWorldWithId(worldid);
-				if(wo!=null)
-				{
-					Block b = wo.getBlockAt((int)(double)x,(int)(double)y,(int)(double)z);
-					if(b.getTypeId() == Material.CHEST.getId()){
-						ContainerBlock chest = (ContainerBlock)b.getState();
-						this.containerBlock = chest;
-						this.radius = radius;
-						this.loc = b.getLocation();
-						if(locSplit.length>=6){
-							List<Material> filter = getFilter(FilterType.SUCK);
-							for(int i = 5;i<locSplit.length;i++){
-								filter.add(Material.getMaterial((int)Integer.valueOf(locSplit[i])));
-							}
-						}
-					} else {
-						loadedProperly = false;
-					}
-				} else {
-					loadedProperly = false;
-				}
-
-			} else {
-				loadedProperly = false;
-			}
+			//Obsolete
 		} else if(fileVersion.equals("0.1")||fileVersion.equals("0.2")||fileVersion.equals("0.3")||fileVersion.equals("0.4")||fileVersion.equals("0.5")||fileVersion.equals("0.6")||fileVersion.equals("0.7")||fileVersion.equals("0.8")){
 			String splt[] = loadString.split(";");
 			if(splt.length>=1){
@@ -367,7 +330,7 @@ public class DropChestItem implements Serializable{
 				if(data.length>=6){
 					Double x,y,z;
 					long worldid;
-					World world;
+					World world = null;
 					x = Double.valueOf(data[0]);
 					y = Double.valueOf(data[1]);
 					z = Double.valueOf(data[2]);
@@ -383,12 +346,12 @@ public class DropChestItem implements Serializable{
 					}
 					if(fileVersion.equalsIgnoreCase("0.1")){
 						worldid = Long.valueOf(data[4]);
-						world = plugin.getWorldWithId(worldid);
+						//world = plugin.getWorldWithId(worldid);
 					} else {
 						world = plugin.getServer().getWorld(data[4]);
 						if(world==null)
 						{
-							world = plugin.getServer().createWorld(data[4], env);
+							world = plugin.getServer().createWorld(new WorldCreator(data[4]).environment(env));
 						}
 					}
 					if(fileVersion.equals("0.4")){
@@ -795,7 +758,7 @@ public class DropChestItem implements Serializable{
 	}
 
 	private Location locationFromString(ArrayList<String> args){
-		World w = Bukkit.getServer().createWorld(args.get(0), Environment.valueOf(args.get(1)));
+		World w = Bukkit.getServer().createWorld(new WorldCreator(args.get(0)).environment(Environment.valueOf(args.get(1))));
 		int x = Integer.valueOf(args.get(2));
 		int y = Integer.valueOf(args.get(3));
 		int z = Integer.valueOf(args.get(4));

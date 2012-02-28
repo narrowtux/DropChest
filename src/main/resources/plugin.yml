@@ -1,7 +1,7 @@
 name: DropChest
-version: 0.8.1.${build.number}
+version: 0.8.3
 author: narrowtux
-description: Sucks dropped loot into Chests. Useful for automatic farming or gathering loot from mob traps.
+description: Absorbs dropped loot into Chests. Useful for automatic farming or gathering loot from mob traps.
 
 main: com.narrowtux.dropchest.DropChest
 
@@ -19,17 +19,49 @@ commands:
         usage: /<command> <name|id>
 
 permissions:
-    dropchest.*:
-        description: Access to all DropChest commands.
-        children:
-            dropchest.create: true
-            dropchest.destroy: true
-            dropchest.remove: true
-            dropchest.list: true
-            dropchest.which: true
-            dropchest.teleport: true
-            dropchest.radius.set: true
-            dropchest.radius.setBig: true
-            dropchest.filter.set: true
-            dropchest.filter.reset: true
-            dropchest.moderator: true
+  dropchest:
+    description: basic permission to gain usage of this plugin.
+    default: true
+  dropchest.create:
+    default: true
+  dropchest.remove:
+    default: true
+  dropchest.radius.set:
+    default: true
+  dropchest.radius.setBig:
+    default: op
+  dropchest.which:
+    default: true
+  dropchest.teleport:
+    default: op
+  dropchest.filter:
+    default: true
+  dropchest.filter:
+    default: true
+  dropchest.filter.set:
+    default: true
+  dropchest.filter.reset:
+    default: true
+  dropchest.list:
+    default: true
+  dropchest.destroy:
+    default: false
+  dropchest.protect:
+    default: true
+  dropchest.moderator:
+    default: op
+  dropchest.*:
+    description: Access to all DropChest commands.
+    children:
+        dropchest.create: true
+        dropchest.destroy: true
+        dropchest.remove: true
+        dropchest.list: true
+        dropchest.which: true
+        dropchest.teleport: true
+        dropchest.radius.set: true
+        dropchest.radius.setBig: true
+        dropchest.filter.set: true
+        dropchest.filter.reset: true
+        dropchest.moderator: true
+        dropchest: true

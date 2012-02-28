@@ -20,6 +20,8 @@ package com.narrowtux.dropchest;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -81,7 +83,7 @@ public class EntityWatcher implements Runnable {
 										timers.remove(item.getEntityId());
 										ItemStack stack = item.getItemStack();
 										DropChestSuckEvent event = new DropChestSuckEvent(dci, item);
-										plugin.getServer().getPluginManager().callEvent(event);
+										Bukkit.getPluginManager().callEvent(event);
 										if(!event.isCancelled()){
 											HashMap<Integer, ItemStack> ret = dci.addItem(stack,FilterType.SUCK);
 											boolean allin = false;

@@ -18,14 +18,25 @@
 package com.narrowtux.dropchest.api;
 
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 
 import com.narrowtux.dropchest.DropChestItem;
 
 public class DropChestFillEvent extends Event {
 	private DropChestItem chest;
+	
 	public DropChestFillEvent(DropChestItem chest) {
-		super("DropChestFillEvent");
 		this.chest = chest;
+	}
+	
+	private static final HandlerList handlers = new HandlerList();
+	 
+	public HandlerList getHandlers() {
+	    return handlers;
+	}
+	 
+	public static HandlerList getHandlerList() {
+	    return handlers;
 	}
 
 	/**
